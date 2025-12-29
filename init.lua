@@ -13,6 +13,11 @@ vim.opt.smartcase = true
 vim.opt.signcolumn = "yes"
 vim.opt.updatetime = 200
 vim.opt.termguicolors = true
+-- 検索ハイライトは普段はオフ。必要時だけ点灯（Escで消す）
+vim.opt.hlsearch = true
+
+-- Escで検索ハイライトを消す
+vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR><Esc>", { desc = "Clear search highlight" })
 
 -- lazy.nvim bootstrap
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -29,12 +34,62 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-  -- テーマ（VSCode）
+  -- テーマ（VSCode）: 併用可能。既定は cobalt2 を適用するため、ここでは切替のみ準備。
   {
     "Mofiqul/vscode.nvim",
     config = function()
       require("vscode").setup({ transparent = false })
-      vim.cmd.colorscheme("vscode")
+      -- デフォルト適用はしない（cobalt2 を後段で適用）
+      -- vim.cmd.colorscheme("vscode")
+    end,
+  },
+  -- Cobalt2 テーマ（VSCode Cobalt2 に近い配色）
+  { "rktjmp/lush.nvim" },
+  { "tjdevries/colorbuddy.nvim" },
+  {
+    "lalitmee/cobalt2.nvim",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local ok = pcall(function()
+        require("cobalt2").setup({})
+        vim.cmd.colorscheme("cobalt2")
+      end)
+      if not ok then
+        vim.cmd.colorscheme("vscode")
+      end
+      -- 透過を生かしたい場合は下記を有効化
+      -- vim.api.nvim_set_hl(0, "Normal",      { bg = "none" })
+      -- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
+      -- Treesitter ハイライトの色分けを追加（Cobalt2 の色味に寄せる）
+      local set = vim.api.nvim_set_hl
+      local colors = {
+        cyan   = "#9EFFFF",
+        yellow = "#FFC600",
+        orange = "#FF9D00",
+        green  = "#A5FF90",
+        pink   = "#FF6C99",
+        blue   = "#22C7FF",
+        fg     = "#E1EFFF",
+      }
+      set(0, "@string",       { fg = colors.green })
+      set(0, "@number",       { fg = colors.orange })
+      set(0, "@boolean",      { fg = colors.orange })
+      set(0, "@constant",     { fg = colors.pink })
+      set(0, "@keyword",      { fg = colors.blue, italic = true })
+      set(0, "@type",         { fg = colors.cyan })
+      set(0, "@type.builtin", { fg = colors.cyan, italic = true })
+      set(0, "@function",     { fg = colors.cyan, bold = true })
+      set(0, "@method",       { fg = colors.cyan })
+      set(0, "@property",     { fg = colors.yellow })
+      set(0, "@field",        { fg = colors.yellow })
+      set(0, "@label",        { fg = colors.yellow })
+      set(0, "@variable",     { fg = colors.fg })
+      -- Terraform/HCL 強化（ある場合のみ適用）
+      pcall(set, 0, "@attribute.hcl",     { fg = colors.yellow })
+      pcall(set, 0, "@property.hcl",      { fg = colors.yellow })
+      pcall(set, 0, "@type.terraform",    { fg = colors.cyan })
+      pcall(set, 0, "@property.terraform",{ fg = colors.yellow })
     end,
   },
 
@@ -44,7 +99,7 @@ require("lazy").setup({
     build = ":TSUpdate",
     config = function()
       require("nvim-treesitter.configs").setup({
-        highlight = { enable = true },
+        highlight = { enable = true, additional_vim_regex_highlighting = { "terraform", "hcl", "yaml" } },
         ensure_installed = {
           "lua",
           "vim",
@@ -178,7 +233,9 @@ vim.keymap.set("n", "<leader>sp", tb.commands, { desc = "Command Palette" })
 pcall(function()
   local api = require("Comment.api")
   vim.keymap.set("n", "<C-/>", api.toggle.linewise.current, { desc = "Toggle comment" })
-  vim.keymap.set("v", "<C-/>", api.toggle.linewise(vim.fn.visualmode()), { desc = "Toggle comment" })
+  vim.keymap.set("v", "<C-/>", function()
+    api.toggle.linewise(vim.fn.visualmode())
+  end, { desc = "Toggle comment" })
 end)
 
 -- nvim-cmp（Enterで自動確定しない: VSCodeの acceptSuggestionOnEnter=off 相当）
@@ -221,7 +278,8 @@ local on_attach = function(_, bufnr)
   map("n", "<leader>e", vim.diagnostic.open_float, "Line Diagnostics")
 end
 
-require("mason-lspconfig").setup({
+local mlsp = require("mason-lspconfig")
+mlsp.setup({
   ensure_installed = {
     "terraformls",
     "yamlls",
@@ -234,54 +292,45 @@ require("mason-lspconfig").setup({
   },
 })
 
-lspconfig.terraformls.setup({ capabilities = capabilities, on_attach = on_attach })
+-- Mason のインストール先を自動的に使う共通ハンドラ（古いバージョンでも動くようフォールバック）
+local function setup_server(server)
+  local opts = { capabilities = capabilities, on_attach = on_attach }
+  if server == "yamlls" then
+    opts.settings = {
+      yaml = {
+        keyOrdering = false,
+        validate = true,
+        format = { enable = true },
+        kubernetes = true,
+        schemaStore = { enable = false, url = "" },
+        schemas = require("schemastore").yaml.schemas(),
+      },
+    }
+  elseif server == "jsonls" then
+    opts.settings = {
+      json = {
+        validate = { enable = true },
+        schemas = require("schemastore").json.schemas(),
+      },
+    }
+  elseif server == "lua_ls" then
+    opts.settings = {
+      Lua = {
+        diagnostics = { globals = { "vim" } },
+        workspace = { checkThirdParty = false },
+      },
+    }
+  end
+  lspconfig[server].setup(opts)
+end
 
-lspconfig.yamlls.setup({
-  capabilities = capabilities,
-  on_attach = on_attach,
-  settings = {
-    yaml = {
-      keyOrdering = false,
-      validate = true,
-      format = { enable = true },
-      kubernetes = true,
-      schemaStore = { enable = false, url = "" },
-      schemas = require("schemastore").yaml.schemas(),
-    },
-  },
-})
-
-lspconfig.jsonls.setup({
-  capabilities = capabilities,
-  on_attach = on_attach,
-  settings = {
-    json = {
-      validate = { enable = true },
-      schemas = require("schemastore").json.schemas(),
-    },
-  },
-})
-
-lspconfig.dockerls.setup({ capabilities = capabilities, on_attach = on_attach })
-lspconfig.bashls.setup({ capabilities = capabilities, on_attach = on_attach })
-
-lspconfig.lua_ls.setup({
-  capabilities = capabilities,
-  on_attach = on_attach,
-  settings = {
-    Lua = {
-      diagnostics = { globals = { "vim" } },
-      workspace = { checkThirdParty = false },
-    },
-  },
-})
-
-pcall(function()
-  lspconfig.helm_ls.setup({ capabilities = capabilities, on_attach = on_attach })
-end)
-
--- Markdown LSP
-lspconfig.marksman.setup({ capabilities = capabilities, on_attach = on_attach })
+if type(mlsp.setup_handlers) == "function" then
+  mlsp.setup_handlers({ function(server) setup_server(server) end })
+else
+  for _, server in ipairs(mlsp.get_installed_servers()) do
+    setup_server(server)
+  end
+end
 
 -- Format on Save（VSCode: editor.formatOnSave = true 相当）
 require("conform").setup({
@@ -315,7 +364,19 @@ local lint_grp = vim.api.nvim_create_augroup("NvimLintOnSave", { clear = true })
 vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
   group = lint_grp,
   callback = function()
-    require("lint").try_lint()
+    local ft = vim.bo.filetype
+    local names = lint.linters_by_ft[ft]
+    if not names then return end
+    local runnable = {}
+    for _, name in ipairs(names) do
+      local linter = lint.linters[name]
+      if linter then
+        local cmd = type(linter.cmd) == "function" and linter.cmd() or linter.cmd
+        local exe = type(cmd) == "table" and cmd[1] or cmd
+        if vim.fn.executable(exe) == 1 then table.insert(runnable, name) end
+      end
+    end
+    if #runnable > 0 then lint.try_lint(runnable) end
   end,
 })
 
