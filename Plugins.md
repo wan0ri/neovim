@@ -1,28 +1,33 @@
-## Plugins
+# lugins
 
 主要プラグインの目的と代表的なコマンド/操作を一覧化します。カテゴリごとに必要最小限のみ記載しています。
 
 ---
 
-### UI / 起動画面
+## UI / 起動画面
 
 - dashboard-nvim
+
   - 起動時に最近ファイルとショートカットを表示
-  - `:Dashboard` / `<leader>dd`
+  - `:Dashboard` / `Leader+dd`
 
 - lualine.nvim
+
   - ステータスライン（自動設定）
 
 - indent-blankline.nvim（ibl）
+
   - インデントガイド。`dashboard` や `neo-tree` では非表示
 
 - hlchunk.nvim
+
   - ブロック（関数/if など）の境界を可視化
   - Cobalt2 に合わせた色で描画（通常: `#22C7FF`, エラー: `#FF6C99`）
 
 - dropbar.nvim
+
   - ウィンバーにパンくず（クラス/関数/シンボル）表示
-  - 追加操作: `<leader>db`（メニューで要素選択）
+  - 追加操作: `Leader+db`（メニューで要素選択）
 
 - nvim-treesitter-context
   - 画面上部に現在のコンテキスト（関数/ブロック名）を固定表示
@@ -30,29 +35,30 @@
 
 ---
 
-### ファイル/検索
+## ファイル/検索
 
 - telescope.nvim (+ telescope-fzf-native)
-  - ファイル検索: `Ctrl-p` / `<leader>ff`
-  - 全文検索（ripgrep）: `<leader>fg`
-  - バッファ: `<leader>fb`
-  - コマンドパレット: `<leader>sp`
+
+  - ファイル検索: `Ctrl-p` / `Leader+ff`
+  - 全文検索（ripgrep）: `Leader+fg`
+  - バッファ: `Leader+fb`
+  - コマンドパレット: `Leader+sp`
 
 - neo-tree.nvim
   - エクスプローラ: `Ctrl-b` でトグル
 
 ---
 
-### ターミナル
+## ターミナル
 
 - toggleterm.nvim
-  - 下パネル: `<leader>tt`（または `<leader>\``）
+  - 下パネル: `&lt;leader&gt;tt`（または `&lt;leader&gt;`+バッククォートキー）
   - 右パネル: `<leader>tv`、フロート: `<leader>tf`
   - 端末内は `Esc` or `jk` でノーマル戻り
 
 ---
 
-### Git
+## Git
 
 - gitsigns.nvim（行単位の差分/ステージ）
 - neogit（Git UI）: `:Neogit`
@@ -61,35 +67,40 @@
 
 ---
 
-### LSP/補完/フォーマット/診断
+## LSP/補完/フォーマット/診断
 
 - mason.nvim / mason-lspconfig.nvim / nvim-lspconfig
+
   - `:Mason` でツール管理。主要サーバは `init.lua` の `ensure_installed` に列挙
 
 - nvim-cmp + LuaSnip
+
   - 補完エンジン。`<CR>` で確定（自動確定は無効）
 
 - conform.nvim（Format）
-  - 保存時自動フォーマット有効。手動は `<leader>f`
+
+  - 保存時自動フォーマット有効。手動は `Leader+f`
 
 - nvim-lint（Lint）
   - 保存/挿入終了で実行（Markdown/YAML 既定）
 
 ---
 
-### インフラ系
+## インフラ系
 
 - vim-terraform
-  - 保存時 `terraform fmt`（自動整形ON）
+
+  - 保存時 `terraform fmt`（自動整形 ON）
 
 - vim-helm
   - Helm テンプレートの構文支援
 
 ---
 
-### Markdown
+## Markdown
 
 - vim-table-mode
+
   - `:TableModeToggle`（表の整形）
 
 - glow.nvim
@@ -97,9 +108,10 @@
 
 ---
 
-### AI
+## AI
 
 - copilot.vim（インライン補完）
+
   - 初回 `:Copilot auth`
   - Tab 競合があれば `copilot_no_tab_map` を調整
 
@@ -108,8 +120,7 @@
 
 ---
 
-### ナビゲーション/移動
+## ナビゲーション/移動
 
 - accelerated-jk.nvim
   - `j/k` 長押しで加速度スクロール
-

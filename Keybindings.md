@@ -1,19 +1,19 @@
-## Keybindings
+# Keybindings
 
 主要なキーバインドをカテゴリ別にまとめています。`<leader>` はスペース（`<Space>`）です。
 
 ---
 
-### 基本
+## 基本
 
 - クリア検索ハイライト: `<Esc>`
 - コメントトグル: `gcc`（行）/ ビジュアル選択後に `gc`
-- 形式整形: `<leader>f`（保存時自動も有効）
+- 形式整形: `&lt;leader&gt;f`（保存時自動も有効）
 - 高速スクロール: `j/k`（accelerated-jk）
 
 ---
 
-### ファイル/検索（Telescope）
+## ファイル/検索（Telescope）
 
 - ファイルを開く（Quick Open）: `Ctrl-p` / `<leader>ff`
 - 隠しファイル/無視も含む検索: `<leader>fa`
@@ -23,22 +23,22 @@
 
 ---
 
-### エクスプローラ（Neo-tree）
+## エクスプローラ（Neo-tree）
 
 - トグル: `Ctrl-b`
 
 ---
 
-### ターミナル（toggleterm）
+## ターミナル（toggleterm）
 
-- 下パネルトグル: `<leader>tt` / `<leader>\``
+- 下パネルトグル: `<leader>tt` / `&lt;leader&gt;`+バッククォートキー`
 - 縦パネル: `<leader>tv`
 - フロート: `<leader>tf`
-- ターミナル→ノーマル: `Esc` または `jk`
+- ターミナル → ノーマル: `Esc` または `jk`
 
 ---
 
-### 起動画面/パンくず/コンテキスト
+## 起動画面/パンくず/コンテキスト
 
 - ダッシュボード: `<leader>dd` / `:Dashboard`
 - Dropbar メニュー: `<leader>db`
@@ -47,7 +47,7 @@
 
 ---
 
-### LSP（バッファローカル）
+## LSP（バッファローカル）
 
 - 定義へ: `gd`
 - 参照: `gr`
@@ -59,15 +59,14 @@
 
 ---
 
-### Git
+## Git
 
 - Neogit: `:Neogit`
 - Diffview: `:DiffviewOpen` / `:DiffviewClose`
 
 ---
 
-### Copilot / CopilotChat
+## Copilot / CopilotChat
 
 - 認証: `:Copilot auth`（初回）
-- CopilotChat: `<leader>co`（Open）/ `<leader>cc`（Prompt）/ `<leader>cq`（Close）
-
+- CopilotChat: `&lt;leader&gt;co`（Open）/ `&lt;leader&gt;cc`（Prompt）/ `&lt;leader&gt;cq`（Close）

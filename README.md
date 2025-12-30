@@ -11,7 +11,7 @@
 - プロジェクト内検索: `<leader>fg`
 - エクスプローラ: `Ctrl-b`
 - フォーマット: `<leader>f`（保存時も自動）
-- ターミナル（下パネル）: `<leader>tt` / `<leader>\``（トグル）
+- ターミナル（下パネル）: `<leader>tt` / `&lt;leader&gt;`+バッククォートキー（トグル）
 - ダッシュボード: `<leader>dd`
 
 ---
@@ -27,7 +27,7 @@
 
 ## 前提環境（抜粋）
 
-- Neovim 0.9+、git、ripgrep、make（fzf拡張のビルド用）
+- Neovim 0.9+、git、ripgrep、make（fzf 拡張のビルド用）
 - Nerd Font（例: MesloLGS NF）
 
 ---
