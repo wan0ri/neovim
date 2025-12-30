@@ -207,8 +207,8 @@ require("lazy").setup({
   {
     "hashivim/vim-terraform",
     config = function()
-      -- conform.nvimで統一するため自動fmtは無効
-      vim.g.terraform_fmt_on_save = 0
+      -- 自動フォーマット有効化（terraform fmt）
+      vim.g.terraform_fmt_on_save = 1
       vim.g.terraform_align = 1
     end,
   },
@@ -217,6 +217,38 @@ require("lazy").setup({
   -- Markdown（All in One / Table / Preview 代替）
   { "dhruvasagar/vim-table-mode" },
   { "ellisonleao/glow.nvim", config = true, cmd = "Glow" },
+
+  -- Copilot（インライン提案: copilot.vim、チャット: CopilotChat.nvim）
+  -- CopilotChat は copilot.lua を利用するため、最小構成で同梱。
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    build = ":Copilot auth",
+    config = function()
+      require("copilot").setup({
+        suggestion = { enabled = false }, -- インラインは copilot.vim を使う前提で無効
+        panel = { enabled = false },
+      })
+    end,
+  },
+  {
+    "github/copilot.vim",
+    init = function()
+      -- Tab 競合回避が必要な場合は下記を有効化
+      -- vim.g.copilot_no_tab_map = true
+      -- vim.keymap.set("i", "<C-]>", "copilot#Accept()", { expr = true, replace_keycodes = false, desc = "Copilot accept" })
+    end,
+  },
+  {
+    "CopilotC-Nvim/CopilotChat.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "zbirenbaum/copilot.lua" },
+    opts = {},
+    keys = {
+      { "<leader>co", ":CopilotChatOpen<CR>", desc = "CopilotChat: Open" },
+      { "<leader>cc", ":CopilotChat<CR>",     desc = "CopilotChat: Prompt" },
+      { "<leader>cq", ":CopilotChatClose<CR>",desc = "CopilotChat: Close" },
+    },
+  },
 })
 
 -- Telescope VSCode風キーマップ
