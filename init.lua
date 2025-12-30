@@ -115,6 +115,134 @@ require("lazy").setup({
     end,
   },
 
+  -- カーソル周辺のコンテキスト（関数/ブロック名）をステッキーヘッダとして表示
+  {
+    "nvim-treesitter/nvim-treesitter-context",
+    event = { "BufReadPre", "BufNewFile" },
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    config = function()
+      require("treesitter-context").setup({
+        enable = true,
+        max_lines = 3,
+        multiline_threshold = 5,
+        trim_scope = "outer",
+        mode = "cursor",
+        separator = "─", -- Cobalt2 に馴染む薄めのライン
+      })
+
+      -- 不要なバッファでは無効化
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "dashboard", "neo-tree", "help", "lazy", "mason", "gitcommit", "toggleterm" },
+        callback = function()
+          pcall(require("treesitter-context").disable)
+        end,
+      })
+
+      -- 色味（背景はテーマに合わせる。境界線だけシアン）
+      pcall(vim.api.nvim_set_hl, 0, "TreesitterContext", { default = true })
+      pcall(vim.api.nvim_set_hl, 0, "TreesitterContextLineNumber", { default = true })
+      pcall(vim.api.nvim_set_hl, 0, "TreesitterContextSeparator", { fg = "#22C7FF" })
+
+      -- トグル/ジャンプ
+      vim.keymap.set("n", "<leader>ct", ":TSContextToggle<CR>", { desc = "Context: toggle" })
+      vim.keymap.set("n", "[c", function()
+        pcall(require("treesitter-context").go_to_context)
+      end, { desc = "Context: jump up" })
+    end,
+  },
+
+  -- ウィンバー上にパンくず（関数/クラス/ファイル階層）を表示
+  {
+    "Bekaboo/dropbar.nvim",
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-tree/nvim-web-devicons",
+    },
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      require("dropbar").setup({})
+
+      -- パンくずから要素選択
+      vim.keymap.set("n", "<leader>db", function()
+        pcall(require("dropbar.api").pick)
+      end, { desc = "Dropbar: pick" })
+
+      -- 特定のバッファでは winbar を消す
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "dashboard", "neo-tree", "help", "lazy", "mason", "gitcommit", "toggleterm" },
+        callback = function()
+          vim.opt_local.winbar = nil
+        end,
+      })
+    end,
+  },
+
+  -- VSCode風の下パネル・ターミナル
+  {
+    "akinsho/toggleterm.nvim",
+    version = "*",
+    event = "VeryLazy",
+    opts = {
+      -- 画面下に30%の高さで表示（縦/横でサイズを出し分け）
+      size = function(term)
+        if term.direction == "horizontal" then
+          return math.floor(vim.o.lines * 0.30)
+        elseif term.direction == "vertical" then
+          return math.floor(vim.o.columns * 0.40)
+        end
+        return 20
+      end,
+      open_mapping = [[<leader>`]], -- VSCode風トグル（Leader+`）
+      direction = "horizontal",
+      shade_terminals = true,
+      start_in_insert = true,
+      persist_mode = false,
+      close_on_exit = true,
+      -- Cobalt2 に合わせた境界線色（フロート時）
+      highlights = {
+        FloatBorder = { guifg = "#22C7FF" },
+      },
+    },
+    config = function(_, opts)
+      require("toggleterm").setup(opts)
+
+      -- 追加トグルキー
+      vim.keymap.set("n", "<leader>tt", ":ToggleTerm<CR>", { desc = "Terminal: toggle (bottom)" })
+      vim.keymap.set("n", "<leader>tv", ":ToggleTerm direction=vertical<CR>", { desc = "Terminal: vertical" })
+      vim.keymap.set("n", "<leader>tf", ":ToggleTerm direction=float<CR>", { desc = "Terminal: float" })
+
+      -- ターミナル内からノーマルへ戻る
+      vim.api.nvim_create_autocmd("TermOpen", {
+        pattern = "*",
+        callback = function()
+          vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { buffer = 0 })
+          vim.keymap.set("t", "jk",   [[<C-\><C-n>]], { buffer = 0 })
+          vim.opt_local.number = false
+          vim.opt_local.relativenumber = false
+          vim.opt_local.signcolumn = "no"
+        end,
+      })
+    end,
+  },
+
+  -- j/k 長押し時に加速度的にスクロール
+  {
+    "rainbowhxch/accelerated-jk.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("accelerated-jk").setup({
+        mode = "time_driven",
+        enable_deceleration = true,
+        acceleration_motions = { "h", "j", "k", "l" },
+      })
+      vim.keymap.set("n", "j", "<Plug>(accelerated_jk_j)")
+      vim.keymap.set("n", "k", "<Plug>(accelerated_jk_k)")
+      -- 折り返し移動を使う場合は下記に切替
+      -- vim.keymap.set("n", "j", "<Plug>(accelerated_jk_gj)")
+      -- vim.keymap.set("n", "k", "<Plug>(accelerated_jk_gk)")
+    end,
+  },
+
   -- ファイル検索/コマンドパレット
   { "nvim-lua/plenary.nvim" },
   {
@@ -196,6 +324,39 @@ require("lazy").setup({
         buftypes = { "terminal", "nofile", "prompt" },
       },
     },
+  },
+
+  -- カーリーブレース/コードブロックのチャンクを可視化
+  {
+    "shellRaining/hlchunk.nvim",
+    event = { "BufReadPre", "BufNewFile" },
+    config = function()
+      require("hlchunk").setup({
+        chunk = {
+          enable = true,
+          use_treesitter = true,
+          -- cobalt2 に合わせた色味（通常: シアン、エラー: ピンク）
+          style = {
+            { fg = "#22C7FF" }, -- cobalt2 blue/cyan
+            { fg = "#FF6C99" }, -- cobalt2 pink (error)
+          },
+          chars = {
+            horizontal_line = "─",
+            vertical_line   = "│",
+            left_top        = "┌",
+            left_bottom     = "└",
+            right_arrow     = "─",
+          },
+          exclude_filetypes = {
+            "dashboard", "neo-tree", "help", "lazy", "mason",
+            "TelescopePrompt", "TelescopeResults", "gitcommit",
+          },
+        },
+        indent = { enable = false },   -- indent-blankline と重複させない
+        line_num = { enable = false },
+        blank = { enable = false },
+      })
+    end,
   },
 
   -- LSP / 補完 / フォーマット
