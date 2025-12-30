@@ -206,10 +206,27 @@ require("lazy").setup({
     config = function(_, opts)
       require("toggleterm").setup(opts)
 
+      -- Lazygit 連携（Git ルートで開くフロート端末）
+      local Terminal = require("toggleterm.terminal").Terminal
+      local lazygit = Terminal:new({
+        cmd = "lazygit",
+        dir = "git_dir",
+        direction = "float",
+        hidden = true,
+        float_opts = { border = "rounded" },
+        on_open = function()
+          vim.cmd("startinsert!")
+        end,
+      })
+      function _LAZYGIT_TOGGLE()
+        lazygit:toggle()
+      end
+
       -- 追加トグルキー
       vim.keymap.set("n", "<leader>tt", ":ToggleTerm<CR>", { desc = "Terminal: toggle (bottom)" })
       vim.keymap.set("n", "<leader>tv", ":ToggleTerm direction=vertical<CR>", { desc = "Terminal: vertical" })
       vim.keymap.set("n", "<leader>tf", ":ToggleTerm direction=float<CR>", { desc = "Terminal: float" })
+      vim.keymap.set("n", "<leader>gg", "<cmd>lua _LAZYGIT_TOGGLE()<CR>", { desc = "Git: Lazygit toggle" })
 
       -- ターミナル内からノーマルへ戻る
       vim.api.nvim_create_autocmd("TermOpen", {
@@ -307,7 +324,41 @@ require("lazy").setup({
   { "numToStr/Comment.nvim", config = true },
 
   -- which-key（キーチートシート）
-  { "folke/which-key.nvim", config = true },
+  {
+    "folke/which-key.nvim",
+    config = function()
+      local wk = require("which-key")
+      wk.setup({})
+      wk.add({
+        { "<leader>f",  group = "検索/ファイル" },
+        { "<leader>ff", desc  = "ファイルを開く" },
+        { "<leader>fa", desc  = "全ファイル（隠し/無視含む）" },
+        { "<leader>fg", desc  = "全文検索（ripgrep）" },
+        { "<leader>fb", desc  = "バッファ一覧" },
+        { "<leader>sp", desc  = "コマンドパレット" },
+
+        { "<leader>t",  group = "ターミナル" },
+        { "<leader>tt", desc  = "下パネル切替" },
+        { "<leader>tv", desc  = "右パネル切替" },
+        { "<leader>tf", desc  = "フロート切替" },
+
+        { "<leader>d",  group = "ダッシュボード/パンくず/文脈" },
+        { "<leader>dd", desc  = "ダッシュボードを開く" },
+        { "<leader>db", desc  = "Dropbar メニュー" },
+        { "<leader>ct", desc  = "Treesitter Context 切替" },
+
+        { "<leader>g",  group = "Git" },
+        { "<leader>gg", desc  = "Lazygit 切替" },
+
+        { "<leader>c",  group = "Copilot" },
+        { "<leader>co", desc  = "CopilotChat 開く" },
+        { "<leader>cc", desc  = "CopilotChat プロンプト" },
+        { "<leader>cq", desc  = "CopilotChat 閉じる" },
+
+        { "<leader>f",  desc  = "フォーマット" },
+      })
+    end,
+  },
 
   -- インデントガイド（indent-rainbow代替）
   {

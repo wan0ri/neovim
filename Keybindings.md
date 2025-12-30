@@ -63,6 +63,7 @@
 
 - Neogit: `:Neogit`
 - Diffview: `:DiffviewOpen` / `:DiffviewClose`
+- Lazygit（フロート・Git ルートで起動）: `<leader>gg`
 
 ---
 

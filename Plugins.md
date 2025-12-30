@@ -64,6 +64,7 @@
 - neogit（Git UI）: `:Neogit`
 - diffview.nvim（差分/履歴）: `:DiffviewOpen`, `:DiffviewClose`
 - vim-fugitive（低レベル操作）: `:G ...`
+- lazygit（toggleterm 連携）: `<leader>gg` でフロート表示/非表示（Git ルートで起動）
 
 ---
 
