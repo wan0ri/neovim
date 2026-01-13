@@ -251,18 +251,43 @@ require("lazy").setup({
 
 			-- Lazygit 連携（Git ルートで開くフロート端末）
 			local Terminal = require("toggleterm.terminal").Terminal
-			local lazygit = Terminal:new({
-				cmd = "lazygit",
-				dir = "git_dir",
-				direction = "float",
-				hidden = true,
-				float_opts = { border = "rounded" },
-				on_open = function()
-					vim.cmd("startinsert!")
-				end,
-			})
-			function _LAZYGIT_TOGGLE()
-				lazygit:toggle()
+			local has_lazygit = (vim.fn.executable("lazygit") == 1)
+			local lazygit
+			if has_lazygit then
+				lazygit = Terminal:new({
+					cmd = "lazygit",
+					dir = "git_dir",
+					direction = "float",
+					hidden = true,
+					float_opts = { border = "rounded" },
+					on_open = function()
+						vim.cmd("startinsert!")
+					end,
+				})
+				function _LAZYGIT_TOGGLE()
+					lazygit:toggle()
+				end
+			else
+				function _LAZYGIT_TOGGLE()
+					local ok = pcall(require, "neogit")
+					if ok then
+						require("neogit").open()
+					else
+						-- 最終フォールバック: フロート端末で git status
+						local fallback = Terminal:new({
+							cmd = 'bash -lc \'git status; echo; echo "Install lazygit with: brew install lazygit"; read -n1 -p "press any key to close..."\'',
+							dir = "git_dir",
+							direction = "float",
+							hidden = true,
+							float_opts = { border = "rounded" },
+						})
+						fallback:toggle()
+					end
+					vim.notify(
+						"lazygit が見つかりません。brew install lazygit の実行を推奨します。",
+						vim.log.levels.WARN
+					)
+				end
 			end
 
 			-- Codex CLI（MCP クライアント）をフロートで開く
