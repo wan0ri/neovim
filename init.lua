@@ -371,8 +371,8 @@ require("lazy").setup({
 			"MunifTanjim/nui.nvim",
 		},
 		config = function()
-      require("neo-tree").setup({
-        filesystem = {
+			require("neo-tree").setup({
+				filesystem = {
 					follow_current_file = { enabled = true },
 					use_libuv_file_watcher = true,
 					filtered_items = {
@@ -384,12 +384,12 @@ require("lazy").setup({
 					},
 				},
 			})
-      vim.keymap.set("n", "<C-b>", "<cmd>Neotree toggle<cr>")
-      -- フォーカス移動系（閉じずに行き来）
-      vim.keymap.set("n", "<leader>e",  ":Neotree focus<CR>",  { desc = "Explorer focus" })
-      vim.keymap.set("n", "<leader>er", ":Neotree reveal<CR>", { desc = "Explorer reveal current" })
-    end,
-  },
+			vim.keymap.set("n", "<C-b>", "<cmd>Neotree toggle<cr>")
+			-- フォーカス移動系（閉じずに行き来）
+			vim.keymap.set("n", "<leader>e", ":Neotree focus<CR>", { desc = "Explorer focus" })
+			vim.keymap.set("n", "<leader>er", ":Neotree reveal<CR>", { desc = "Explorer reveal current" })
+		end,
+	},
 
 	-- ステータスライン
 	{
@@ -734,7 +734,7 @@ if type(mlsp.setup_handlers) == "function" then
 	})
 else
 	for _, server in ipairs(mlsp.get_installed_servers()) do
-		setup_servier(server)
+		setup_server(server)
 	end
 end
 
