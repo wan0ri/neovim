@@ -731,7 +731,7 @@ if type(mlsp.setup_handlers) == "function" then
 	})
 else
 	for _, server in ipairs(mlsp.get_installed_servers()) do
-		setup_server(server)
+		setup_servier(server)
 	end
 end
 

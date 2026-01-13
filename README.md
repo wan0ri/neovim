@@ -42,7 +42,7 @@
 
 ## MCP サーバー連携（Codex TUI 統合）
 
-この構成は Model Context Protocol（MCP）対応のクライアントとして Codex CLI を Neovim 内フロートで起動し、複数の MCP サーバーをまとめて扱います。
+この構成は Model Context Protocol（MCP）対応のクライアントとして、Codex CLI を Neovim 内フロートで起動し、複数の MCP サーバーをまとめて扱います。
 
 **構成の要点**
 
