@@ -19,7 +19,9 @@ vim.opt.hlsearch = true
 -- MCP .env を読み込む（~/.config/mcphub/.env）
 local function load_env_file(path)
 	local file = io.open(path, "r")
-	if not file then return end
+	if not file then
+		return
+	end
 	for line in file:lines() do
 		if not line:match("^%s*#") and line:match("%S") then
 			local key, val = line:match("^%s*([A-Za-z_][A-Za-z0-9_]*)%s*=%s*(.*)%s*$")
@@ -34,6 +36,16 @@ local function load_env_file(path)
 	file:close()
 end
 pcall(load_env_file, vim.fn.expand("~/.config/mcphub/.env"))
+
+-- Terraform Cloud token aliases for Docker pass-through
+if vim.env.TERRAFORM_CLOUD_TOKEN and (#vim.env.TERRAFORM_CLOUD_TOKEN > 0) then
+	if not vim.env.TFE_TOKEN or #vim.env.TFE_TOKEN == 0 then
+		vim.env.TFE_TOKEN = vim.env.TERRAFORM_CLOUD_TOKEN
+	end
+	if not vim.env.TF_TOKEN_app_terraform_io or #vim.env.TF_TOKEN_app_terraform_io == 0 then
+		vim.env.TF_TOKEN_app_terraform_io = vim.env.TERRAFORM_CLOUD_TOKEN
+	end
+end
 
 -- 便利: .env の再読み込みコマンドと MCP 設定ファイルへジャンプ
 pcall(function()
@@ -95,13 +107,13 @@ require("lazy").setup({
 			-- Treesitter ハイライトの色分けを追加（Cobalt2 の色味に寄せる）
 			local set = vim.api.nvim_set_hl
 			local colors = {
-				cyan   = "#9EFFFF",
+				cyan = "#9EFFFF",
 				yellow = "#FFC600",
 				orange = "#FF9D00",
-				green  = "#A5FF90",
-				pink   = "#FF6C99",
-				blue   = "#22C7FF",
-				fg     = "#E1EFFF",
+				green = "#A5FF90",
+				pink = "#FF6C99",
+				blue = "#22C7FF",
+				fg = "#E1EFFF",
 			}
 			set(0, "@string", { fg = colors.green })
 			set(0, "@number", { fg = colors.orange })
@@ -270,11 +282,9 @@ require("lazy").setup({
 
 			-- 追加トグルキー
 			vim.keymap.set("n", "<leader>tt", ":ToggleTerm<CR>", { desc = "Terminal: toggle (bottom)" })
-			vim.keymap.set("n", "<leader>tv", ":ToggleTerm direction=vertical<CR>",
-				{ desc = "Terminal: vertical" })
+			vim.keymap.set("n", "<leader>tv", ":ToggleTerm direction=vertical<CR>", { desc = "Terminal: vertical" })
 			vim.keymap.set("n", "<leader>tf", ":ToggleTerm direction=float<CR>", { desc = "Terminal: float" })
-			vim.keymap.set("n", "<leader>gg", "<cmd>lua _LAZYGIT_TOGGLE()<CR>",
-				{ desc = "Git: Lazygit toggle" })
+			vim.keymap.set("n", "<leader>gg", "<cmd>lua _LAZYGIT_TOGGLE()<CR>", { desc = "Git: Lazygit toggle" })
 			vim.keymap.set("n", "<leader>ac", "<cmd>lua _CODEX_TOGGLE()<CR>", { desc = "AI/MCP: Codex TUI" })
 
 			-- ターミナル内からノーマルへ戻る
@@ -365,12 +375,12 @@ require("lazy").setup({
 	-- Git 連携
 	{ "lewis6991/gitsigns.nvim", config = true },
 	-- Git UI/履歴（Git Graph 代替）
-	{ "NeogitOrg/neogit",        dependencies = { "nvim-lua/plenary.nvim" } },
+	{ "NeogitOrg/neogit", dependencies = { "nvim-lua/plenary.nvim" } },
 	{ "sindrets/diffview.nvim" },
 	{ "tpope/vim-fugitive" },
 
 	-- コメントトグル（gc/gcc）
-	{ "numToStr/Comment.nvim",   config = true },
+	{ "numToStr/Comment.nvim", config = true },
 
 	-- which-key（キーチートシート）
 	{
@@ -422,8 +432,14 @@ require("lazy").setup({
 			scope = { enabled = true },
 			exclude = {
 				filetypes = {
-					"dashboard", "neo-tree", "help", "lazy", "mason",
-					"TelescopePrompt", "TelescopeResults", "gitcommit",
+					"dashboard",
+					"neo-tree",
+					"help",
+					"lazy",
+					"mason",
+					"TelescopePrompt",
+					"TelescopeResults",
+					"gitcommit",
 				},
 				buftypes = { "terminal", "nofile", "prompt" },
 			},
@@ -446,14 +462,20 @@ require("lazy").setup({
 					},
 					chars = {
 						horizontal_line = "─",
-						vertical_line   = "│",
-						left_top        = "┌",
-						left_bottom     = "└",
-						right_arrow     = "─",
+						vertical_line = "│",
+						left_top = "┌",
+						left_bottom = "└",
+						right_arrow = "─",
 					},
 					exclude_filetypes = {
-						"dashboard", "neo-tree", "help", "lazy", "mason",
-						"TelescopePrompt", "TelescopeResults", "gitcommit",
+						"dashboard",
+						"neo-tree",
+						"help",
+						"lazy",
+						"mason",
+						"TelescopePrompt",
+						"TelescopeResults",
+						"gitcommit",
 					},
 				},
 				indent = { enable = false }, -- indent-blankline と重複させない
@@ -464,7 +486,7 @@ require("lazy").setup({
 	},
 
 	-- LSP / 補完 / フォーマット
-	{ "williamboman/mason.nvim",          config = true },
+	{ "williamboman/mason.nvim", config = true },
 	{ "williamboman/mason-lspconfig.nvim" },
 	{ "neovim/nvim-lspconfig" },
 	{ "hrsh7th/nvim-cmp" },
@@ -477,13 +499,31 @@ require("lazy").setup({
 	{ "b0o/SchemaStore.nvim" },
 	{ "stevearc/conform.nvim" },
 	{ "mfussenegger/nvim-lint" },
+	{
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		opts = {
+			ensure_installed = {
+				"prettierd",
+				"prettier",
+				"stylua",
+				"shfmt",
+				"yamlfmt",
+				"yamllint",
+				"markdownlint",
+			},
+			run_on_start = true,
+			start_delay = 1500, -- ms
+			integrations = { mason = true },
+		},
+	},
 
 	-- インフラ特化（Terraform/Helm）
 	{
 		"hashivim/vim-terraform",
 		config = function()
 			-- 自動フォーマット有効化（terraform fmt）
-			vim.g.terraform_fmt_on_save = 1
+			-- Conform.nvim の保存時フォーマットと二重実行を避けるため 0 に設定
+			vim.g.terraform_fmt_on_save = 0
 			vim.g.terraform_align = 1
 		end,
 	},
@@ -491,7 +531,7 @@ require("lazy").setup({
 
 	-- Markdown（All in One / Table / Preview 代替）
 	{ "dhruvasagar/vim-table-mode" },
-	{ "ellisonleao/glow.nvim",     config = true, cmd = "Glow" },
+	{ "ellisonleao/glow.nvim", config = true, cmd = "Glow" },
 
 	-- Startup Dashboard
 	{
@@ -506,10 +546,10 @@ require("lazy").setup({
 					week_header = { enable = true },
 					mru = { limit = 8 },
 					shortcut = {
-						{ desc = "Files",   group = "Label",          key = "f", action = "Telescope find_files" },
-						{ desc = "Grep",    group = "DiagnosticHint", key = "g", action = "Telescope live_grep" },
-						{ desc = "NeoTree", group = "String",         key = "e", action = "Neotree toggle" },
-						{ desc = "Update",  group = "Exception",      key = "u", action = "Lazy sync" },
+						{ desc = "Files", group = "Label", key = "f", action = "Telescope find_files" },
+						{ desc = "Grep", group = "DiagnosticHint", key = "g", action = "Telescope live_grep" },
+						{ desc = "NeoTree", group = "String", key = "e", action = "Neotree toggle" },
+						{ desc = "Update", group = "Exception", key = "u", action = "Lazy sync" },
 					},
 					footer = function()
 						return { "Happy hacking with Neovim." }
@@ -545,8 +585,8 @@ require("lazy").setup({
 		dependencies = { "nvim-lua/plenary.nvim", "zbirenbaum/copilot.lua" },
 		opts = {},
 		keys = {
-			{ "<leader>co", ":CopilotChatOpen<CR>",  desc = "CopilotChat: Open" },
-			{ "<leader>cc", ":CopilotChat<CR>",      desc = "CopilotChat: Prompt" },
+			{ "<leader>co", ":CopilotChatOpen<CR>", desc = "CopilotChat: Open" },
+			{ "<leader>cc", ":CopilotChat<CR>", desc = "CopilotChat: Prompt" },
 			{ "<leader>cq", ":CopilotChatClose<CR>", desc = "CopilotChat: Close" },
 		},
 	},
@@ -555,8 +595,9 @@ require("lazy").setup({
 -- Telescope VSCode風キーマップ
 local tb = require("telescope.builtin")
 vim.keymap.set("n", "<C-p>", tb.find_files, { desc = "Quick Open (files)" })
-vim.keymap.set("n", "<leader>fa", function() tb.find_files({ no_ignore = true, hidden = true }) end,
-	{ desc = "Find files (ALL: hidden & gitignored)" })
+vim.keymap.set("n", "<leader>fa", function()
+	tb.find_files({ no_ignore = true, hidden = true })
+end, { desc = "Find files (ALL: hidden & gitignored)" })
 vim.keymap.set("n", "<leader>ff", tb.find_files, { desc = "Find files" })
 vim.keymap.set("n", "<leader>fg", tb.live_grep, { desc = "Search in files" })
 vim.keymap.set("n", "<leader>fb", tb.buffers, { desc = "Find buffers" })
@@ -658,7 +699,11 @@ local function setup_server(server)
 end
 
 if type(mlsp.setup_handlers) == "function" then
-	mlsp.setup_handlers({ function(server) setup_server(server) end })
+	mlsp.setup_handlers({
+		function(server)
+			setup_server(server)
+		end,
+	})
 else
 	for _, server in ipairs(mlsp.get_installed_servers()) do
 		setup_server(server)
@@ -699,17 +744,23 @@ vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
 	callback = function()
 		local ft = vim.bo.filetype
 		local names = lint.linters_by_ft[ft]
-		if not names then return end
+		if not names then
+			return
+		end
 		local runnable = {}
 		for _, name in ipairs(names) do
 			local linter = lint.linters[name]
 			if linter then
 				local cmd = type(linter.cmd) == "function" and linter.cmd() or linter.cmd
 				local exe = type(cmd) == "table" and cmd[1] or cmd
-				if vim.fn.executable(exe) == 1 then table.insert(runnable, name) end
+				if vim.fn.executable(exe) == 1 then
+					table.insert(runnable, name)
+				end
 			end
 		end
-		if #runnable > 0 then lint.try_lint(runnable) end
+		if #runnable > 0 then
+			lint.try_lint(runnable)
+		end
 	end,
 })
 
