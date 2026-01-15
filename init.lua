@@ -49,19 +49,19 @@ end
 
 -- macOS: Homebrew のパスを Neovim 起動時に補強（Glow/markdown-preview などのCLI検出安定化）
 pcall(function()
-  if (vim.loop.os_uname().sysname or ""):match("Darwin") then
-    local brew_paths = { "/opt/homebrew/bin", "/usr/local/bin" }
-    local path = vim.env.PATH or ""
-    local new = {}
-    for _, p in ipairs(brew_paths) do
-      if not path:find(p, 1, true) and vim.loop.fs_stat(p) then
-        table.insert(new, p)
-      end
-    end
-    if #new > 0 then
-      vim.env.PATH = table.concat(new, ":") .. ":" .. path
-    end
-  end
+	if (vim.loop.os_uname().sysname or ""):match("Darwin") then
+		local brew_paths = { "/opt/homebrew/bin", "/usr/local/bin" }
+		local path = vim.env.PATH or ""
+		local new = {}
+		for _, p in ipairs(brew_paths) do
+			if not path:find(p, 1, true) and vim.loop.fs_stat(p) then
+				table.insert(new, p)
+			end
+		end
+		if #new > 0 then
+			vim.env.PATH = table.concat(new, ":") .. ":" .. path
+		end
+	end
 end)
 
 -- 便利: .env の再読み込みコマンドと MCP 設定ファイルへジャンプ
@@ -94,116 +94,127 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-    -- テーマ（Tokyonight を既定適用。VSCode/cobalt2 は切替用）
-    {
-        "folke/tokyonight.nvim",
-        lazy = false,
-        priority = 1000,
-        opts = {
-            style = "night",
-            transparent = false, -- 既定は不透明（必要時はトグルで透過）
-            terminal_colors = true,
-            styles = {
-                comments = { italic = true },
-                keywords = { italic = false },
-                functions = { bold = true },
-                variables = {},
-                sidebars = "dark",
-                floats = "dark",
-            },
-            lualine_bold = true,
-        },
-        config = function(_, opts)
-            require("tokyonight").setup(opts)
-            vim.cmd.colorscheme("tokyonight")
-        end,
-    },
-    -- 背景透過をプラグインで管理（トグル/除外が容易）
-    {
-        "xiyaowong/nvim-transparent",
-        config = function()
-            require("transparent").setup({
-                enable = false, -- 既定はOFF（必要時に <leader>uT でON）
-                extra_groups = {
-                    "NormalFloat", "FloatBorder", "Pmenu", "PmenuSel",
-                    "TelescopeNormal", "TelescopeBorder", "TelescopePromptNormal",
-                    "TelescopeResultsNormal", "TelescopePromptBorder", "TelescopeResultsBorder",
-                    "NeoTreeNormal", "NeoTreeNormalNC", "WhichKeyFloat", "WhichKeyBorder",
-                    "MsgArea", "SignColumn",
-                },
-                exclude = {},
-            })
-            vim.keymap.set("n", "<leader>uT", ":TransparentToggle<CR>", { desc = "UI: Transparent toggle" })
-        end,
-    },
-    {
-        "Mofiqul/vscode.nvim",
-        config = function()
-            require("vscode").setup({ transparent = false })
-            -- vim.cmd.colorscheme("vscode") -- 必要時に手動で切替
-        end,
-    },
-    -- Cobalt2 テーマ（切替用。既定では適用しない）
-    { "rktjmp/lush.nvim" },
-    { "tjdevries/colorbuddy.nvim" },
-    {
-        "lalitmee/cobalt2.nvim",
-        lazy = false,
-        priority = 999,
-        config = function()
-            -- cobalt2 を選んだ時だけ追加調整を適用
-            local function apply_cobalt2_extras()
-                local set = vim.api.nvim_set_hl
-                local colors = {
-                    cyan = "#9EFFFF",
-                    yellow = "#FFC600",
-                    orange = "#FF9D00",
-                    green = "#A5FF90",
-                    pink = "#FF6C99",
-                    blue = "#22C7FF",
-                    fg = "#E1EFFF",
-                }
-                set(0, "@string", { fg = colors.green })
-                set(0, "@number", { fg = colors.orange })
-                set(0, "@boolean", { fg = colors.orange })
-                set(0, "@constant", { fg = colors.pink })
-                set(0, "@keyword", { fg = colors.blue, italic = true })
-                set(0, "@type", { fg = colors.cyan })
-                set(0, "@type.builtin", { fg = colors.cyan, italic = true })
-                set(0, "@function", { fg = colors.cyan, bold = true })
-                set(0, "@method", { fg = colors.cyan })
-                set(0, "@property", { fg = colors.yellow })
-                set(0, "@field", { fg = colors.yellow })
-                set(0, "@label", { fg = colors.yellow })
-                set(0, "@variable", { fg = colors.fg })
-                -- Terraform/HCL 強化（ある場合のみ適用）
-                pcall(set, 0, "@attribute.hcl", { fg = colors.yellow })
-                pcall(set, 0, "@property.hcl", { fg = colors.yellow })
-                pcall(set, 0, "@type.terraform", { fg = colors.cyan })
-                pcall(set, 0, "@property.terraform", { fg = colors.yellow })
-            end
+	-- テーマ（Tokyonight を既定適用。VSCode/cobalt2 は切替用）
+	{
+		"folke/tokyonight.nvim",
+		lazy = false,
+		priority = 1000,
+		opts = {
+			style = "night",
+			transparent = false, -- 既定は不透明（必要時はトグルで透過）
+			terminal_colors = true,
+			styles = {
+				comments = { italic = true },
+				keywords = { italic = false },
+				functions = { bold = true },
+				variables = {},
+				sidebars = "dark",
+				floats = "dark",
+			},
+			lualine_bold = true,
+		},
+		config = function(_, opts)
+			require("tokyonight").setup(opts)
+			vim.cmd.colorscheme("tokyonight")
+		end,
+	},
+	-- 背景透過をプラグインで管理（トグル/除外が容易）
+	{
+		"xiyaowong/nvim-transparent",
+		config = function()
+			require("transparent").setup({
+				enable = false, -- 既定はOFF（必要時に <leader>uT でON）
+				extra_groups = {
+					"NormalFloat",
+					"FloatBorder",
+					"Pmenu",
+					"PmenuSel",
+					"TelescopeNormal",
+					"TelescopeBorder",
+					"TelescopePromptNormal",
+					"TelescopeResultsNormal",
+					"TelescopePromptBorder",
+					"TelescopeResultsBorder",
+					"NeoTreeNormal",
+					"NeoTreeNormalNC",
+					"WhichKeyFloat",
+					"WhichKeyBorder",
+					"MsgArea",
+					"SignColumn",
+				},
+				exclude = {},
+			})
+			vim.keymap.set("n", "<leader>uT", ":TransparentToggle<CR>", { desc = "UI: Transparent toggle" })
+		end,
+	},
+	{
+		"Mofiqul/vscode.nvim",
+		config = function()
+			require("vscode").setup({ transparent = false })
+			-- vim.cmd.colorscheme("vscode") -- 必要時に手動で切替
+		end,
+	},
+	-- Cobalt2 テーマ（切替用。既定では適用しない）
+	{ "rktjmp/lush.nvim" },
+	{ "tjdevries/colorbuddy.nvim" },
+	{
+		"lalitmee/cobalt2.nvim",
+		lazy = false,
+		priority = 999,
+		config = function()
+			-- cobalt2 を選んだ時だけ追加調整を適用
+			local function apply_cobalt2_extras()
+				local set = vim.api.nvim_set_hl
+				local colors = {
+					cyan = "#9EFFFF",
+					yellow = "#FFC600",
+					orange = "#FF9D00",
+					green = "#A5FF90",
+					pink = "#FF6C99",
+					blue = "#22C7FF",
+					fg = "#E1EFFF",
+				}
+				set(0, "@string", { fg = colors.green })
+				set(0, "@number", { fg = colors.orange })
+				set(0, "@boolean", { fg = colors.orange })
+				set(0, "@constant", { fg = colors.pink })
+				set(0, "@keyword", { fg = colors.blue, italic = true })
+				set(0, "@type", { fg = colors.cyan })
+				set(0, "@type.builtin", { fg = colors.cyan, italic = true })
+				set(0, "@function", { fg = colors.cyan, bold = true })
+				set(0, "@method", { fg = colors.cyan })
+				set(0, "@property", { fg = colors.yellow })
+				set(0, "@field", { fg = colors.yellow })
+				set(0, "@label", { fg = colors.yellow })
+				set(0, "@variable", { fg = colors.fg })
+				-- Terraform/HCL 強化（ある場合のみ適用）
+				pcall(set, 0, "@attribute.hcl", { fg = colors.yellow })
+				pcall(set, 0, "@property.hcl", { fg = colors.yellow })
+				pcall(set, 0, "@type.terraform", { fg = colors.cyan })
+				pcall(set, 0, "@property.terraform", { fg = colors.yellow })
+			end
 
-            -- 既定で cobalt2 を強制適用しない。
-            -- cobalt2 を選択した時だけ上記調整をかける。
-            if vim.g.colors_name == "cobalt2" then
-                apply_cobalt2_extras()
-            end
-            vim.api.nvim_create_autocmd("ColorScheme", {
-                pattern = "cobalt2",
-                callback = apply_cobalt2_extras,
-            })
-        end,
-    },
+			-- 既定で cobalt2 を強制適用しない。
+			-- cobalt2 を選択した時だけ上記調整をかける。
+			if vim.g.colors_name == "cobalt2" then
+				apply_cobalt2_extras()
+			end
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				pattern = "cobalt2",
+				callback = apply_cobalt2_extras,
+			})
+		end,
+	},
 
-    -- Neovim Lua 開発補助（lua_ls に Neovim API 型情報を付与）
-    {
-        "folke/neodev.nvim",
-        lazy = false,
-        priority = 900,
-        opts = {
-            library = { types = true }, -- vim.*, luv.* の型情報
-        },
-    },
+	-- Neovim Lua 開発補助（lua_ls に Neovim API 型情報を付与）
+	{
+		"folke/neodev.nvim",
+		lazy = false,
+		priority = 900,
+		opts = {
+			library = { types = true }, -- vim.*, luv.* の型情報
+		},
+	},
 
 	-- Treesitter（基本の構文強調）
 	{
@@ -311,9 +322,9 @@ require("lazy").setup({
 			persist_mode = false,
 			close_on_exit = true,
 		},
-        config = function(_, opts)
-            -- ハイライトはテーマ（Tokyonight）の FloatBorder/NormalFloat に完全委譲
-            require("toggleterm").setup(opts)
+		config = function(_, opts)
+			-- ハイライトはテーマ（Tokyonight）の FloatBorder/NormalFloat に完全委譲
+			require("toggleterm").setup(opts)
 
 			-- Lazygit 連携（Git ルートで開くフロート端末）
 			local Terminal = require("toggleterm.terminal").Terminal
@@ -457,75 +468,80 @@ require("lazy").setup({
 		end,
 	},
 
-    -- ステータスライン（診断/Git/情報を出し分け）
-    {
-        "nvim-lualine/lualine.nvim",
-        dependencies = { "nvim-tree/nvim-web-devicons" },
-        config = function()
-            local function hl_fg(name)
-                local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
-                if ok and hl and hl.fg then
-                    return string.format("#%06x", hl.fg)
-                end
-                return nil
-            end
-            local added = hl_fg("GitSignsAdd") or hl_fg("DiffAdd")
-            local modified = hl_fg("GitSignsChange") or hl_fg("DiffChange")
-            local removed = hl_fg("GitSignsDelete") or hl_fg("DiffDelete")
-            require("lualine").setup({
-                options = {
-                    theme = "auto", -- 現在のカラースキームに追従
-                    globalstatus = true,
-                    component_separators = { left = "│", right = "│" },
-                    section_separators = { left = "", right = "" },
-                    disabled_filetypes = { statusline = { "dashboard", "neo-tree" } },
-                },
-                sections = {
-                    lualine_a = { { "mode", icon = "" } },
-                    lualine_b = {
-                        { "branch", icon = "" },
-                        {
-                            "diff",
-                            symbols = { added = " ", modified = " ", removed = " " },
-                            colored = true,
-                            -- 現在のハイライトから色を取得（なければテーマに委譲）
-                            diff_color = (added or modified or removed) and {
-                                added = added and { fg = added } or nil,
-                                modified = modified and { fg = modified } or nil,
-                                removed = removed and { fg = removed } or nil,
-                            } or nil,
-                        },
-                    },
-                    lualine_c = {
-                        { "filename", path = 1, symbols = { modified = " [+]", readonly = " " } },
-                    },
-                    lualine_x = {
-                        {
-                            "diagnostics",
-                            sources = { "nvim_diagnostic" },
-                            sections = { "error", "warn", "info", "hint" },
-                            symbols = { error = " ", warn = " ", info = " ", hint = " " },
-                            colored = true,
-                            update_in_insert = false,
-                        },
-                        { "encoding", cond = function() return vim.o.fileencoding ~= "utf-8" end },
-                        { "fileformat" },
-                        { "filetype" },
-                    },
-                    lualine_y = { { "progress" } },
-                    lualine_z = { { "location" } },
-                },
-                inactive_sections = {
-                    lualine_a = {},
-                    lualine_b = {},
-                    lualine_c = { { "filename", path = 1 } },
-                    lualine_x = { "location" },
-                    lualine_y = {},
-                    lualine_z = {},
-                },
-            })
-        end,
-    },
+	-- ステータスライン（診断/Git/情報を出し分け）
+	{
+		"nvim-lualine/lualine.nvim",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		config = function()
+			local function hl_fg(name)
+				local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
+				if ok and hl and hl.fg then
+					return string.format("#%06x", hl.fg)
+				end
+				return nil
+			end
+			local added = hl_fg("GitSignsAdd") or hl_fg("DiffAdd")
+			local modified = hl_fg("GitSignsChange") or hl_fg("DiffChange")
+			local removed = hl_fg("GitSignsDelete") or hl_fg("DiffDelete")
+			require("lualine").setup({
+				options = {
+					theme = "auto", -- 現在のカラースキームに追従
+					globalstatus = true,
+					component_separators = { left = "│", right = "│" },
+					section_separators = { left = "", right = "" },
+					disabled_filetypes = { statusline = { "dashboard", "neo-tree" } },
+				},
+				sections = {
+					lualine_a = { { "mode", icon = "" } },
+					lualine_b = {
+						{ "branch", icon = "" },
+						{
+							"diff",
+							symbols = { added = " ", modified = " ", removed = " " },
+							colored = true,
+							-- 現在のハイライトから色を取得（なければテーマに委譲）
+							diff_color = (added or modified or removed) and {
+								added = added and { fg = added } or nil,
+								modified = modified and { fg = modified } or nil,
+								removed = removed and { fg = removed } or nil,
+							} or nil,
+						},
+					},
+					lualine_c = {
+						{ "filename", path = 1, symbols = { modified = " [+]", readonly = " " } },
+					},
+					lualine_x = {
+						{
+							"diagnostics",
+							sources = { "nvim_diagnostic" },
+							sections = { "error", "warn", "info", "hint" },
+							symbols = { error = " ", warn = " ", info = " ", hint = " " },
+							colored = true,
+							update_in_insert = false,
+						},
+						{
+							"encoding",
+							cond = function()
+								return vim.o.fileencoding ~= "utf-8"
+							end,
+						},
+						{ "fileformat" },
+						{ "filetype" },
+					},
+					lualine_y = { { "progress" } },
+					lualine_z = { { "location" } },
+				},
+				inactive_sections = {
+					lualine_a = {},
+					lualine_b = {},
+					lualine_c = { { "filename", path = 1 } },
+					lualine_x = { "location" },
+					lualine_y = {},
+					lualine_z = {},
+				},
+			})
+		end,
+	},
 
 	-- Git 連携
 	{ "lewis6991/gitsigns.nvim", config = true },
@@ -540,11 +556,11 @@ require("lazy").setup({
 	-- which-key（キーチートシート）
 	{
 		"folke/which-key.nvim",
-        config = function()
-            local wk = require("which-key")
-            wk.setup({})
-            wk.add({
-                { "<leader>u", group = "UI/Theme" },
+		config = function()
+			local wk = require("which-key")
+			wk.setup({})
+			wk.add({
+				{ "<leader>u", group = "UI/Theme" },
 				{ "<leader>un", desc = "Tokyonight: Night" },
 				{ "<leader>us", desc = "Tokyonight: Storm" },
 				{ "<leader>um", desc = "Tokyonight: Moon" },
@@ -579,15 +595,15 @@ require("lazy").setup({
 				{ "<leader>c", group = "Copilot" },
 				{ "<leader>co", desc = "CopilotChat 開く" },
 				{ "<leader>cc", desc = "CopilotChat プロンプト" },
-                { "<leader>cq", desc = "CopilotChat 閉じる" },
+				{ "<leader>cq", desc = "CopilotChat 閉じる" },
 
-                { "<leader>f", desc = "フォーマット" },
-                { "<leader>m", group = "Markdown" },
-                { "<leader>mg", desc = "Glow プレビュー" },
-                { "<leader>mp", desc = "MarkdownPreview トグル" },
-            })
-        end,
-    },
+				{ "<leader>f", desc = "フォーマット" },
+				{ "<leader>m", group = "Markdown" },
+				{ "<leader>mg", desc = "Glow プレビュー" },
+				{ "<leader>mp", desc = "MarkdownPreview トグル" },
+			})
+		end,
+	},
 
 	-- インデントガイド（indent-rainbow代替）
 	{
@@ -692,23 +708,38 @@ require("lazy").setup({
 	{ "b0o/SchemaStore.nvim" },
 	{ "stevearc/conform.nvim" },
 	{ "mfussenegger/nvim-lint" },
+	{ "kevinhwang91/nvim-hlslens", config = true },
 
 	-- スクロールバー（検索/診断/Git のマーク表示）
 	{
 		"petertriho/nvim-scrollbar",
-		dependencies = { "lewis6991/gitsigns.nvim" },
+		dependencies = { "lewis6991/gitsigns.nvim", "kevinhwang91/nvim-hlslens" },
 		config = function()
 			local ok, scrollbar = pcall(require, "scrollbar")
-			if not ok then return end
+			if not ok then
+				return
+			end
 			scrollbar.setup({
 				excluded_filetypes = {
-					"dashboard", "neo-tree", "help", "lazy", "mason", "TelescopePrompt", "TelescopeResults",
+					"dashboard",
+					"neo-tree",
+					"help",
+					"lazy",
+					"mason",
+					"TelescopePrompt",
+					"TelescopeResults",
 				},
 				excluded_buftypes = { "terminal", "nofile", "prompt" },
 			})
-			pcall(function() require("scrollbar.handlers.search").setup() end)
-			pcall(function() require("scrollbar.handlers.gitsigns").setup() end)
-			pcall(function() require("scrollbar.handlers.diagnostic").setup() end)
+			pcall(function()
+				require("scrollbar.handlers.search").setup()
+			end)
+			pcall(function()
+				require("scrollbar.handlers.gitsigns").setup()
+			end)
+			pcall(function()
+				require("scrollbar.handlers.diagnostic").setup()
+			end)
 		end,
 	},
 	{
@@ -752,7 +783,9 @@ require("lazy").setup({
 		cmd = { "MarkdownPreview", "MarkdownPreviewToggle", "MarkdownPreviewStop" },
 		build = function()
 			-- Node.js がある場合はビルドしてローカルに viewer を用意
-			pcall(function() vim.fn["mkdp#util#install"]() end)
+			pcall(function()
+				vim.fn["mkdp#util#install"]()
+			end)
 		end,
 		init = function()
 			-- 既定ブラウザで開く（デフォルト）。ローカルサーバは 127.0.0.1:xxxx
@@ -847,60 +880,88 @@ end)
 local tn_state = { style = "night", transparent = false, italic = { comments = true, keywords = false } }
 
 local function apply_tokyonight(opts)
-  local ok, tn = pcall(require, "tokyonight")
-  if not ok then return end
-  tn.setup(opts)
-  vim.cmd.colorscheme("tokyonight")
+	local ok, tn = pcall(require, "tokyonight")
+	if not ok then
+		return
+	end
+	tn.setup(opts)
+	vim.cmd.colorscheme("tokyonight")
 end
 
 local function set_tokyonight_style(style)
-  tn_state.style = style
-  apply_tokyonight({
-    style = tn_state.style,
-    transparent = tn_state.transparent,
-    terminal_colors = true,
-    styles = {
-      comments = { italic = tn_state.italic.comments },
-      keywords = { italic = tn_state.italic.keywords },
-      functions = { bold = true },
-      variables = {},
-      sidebars = "dark",
-      floats = "dark",
-    },
-    lualine_bold = true,
-  })
-  pcall(vim.notify, "Tokyonight style: " .. style, vim.log.levels.INFO)
+	tn_state.style = style
+	apply_tokyonight({
+		style = tn_state.style,
+		transparent = tn_state.transparent,
+		terminal_colors = true,
+		styles = {
+			comments = { italic = tn_state.italic.comments },
+			keywords = { italic = tn_state.italic.keywords },
+			functions = { bold = true },
+			variables = {},
+			sidebars = "dark",
+			floats = "dark",
+		},
+		lualine_bold = true,
+	})
+	pcall(vim.notify, "Tokyonight style: " .. style, vim.log.levels.INFO)
 end
 
 local function toggle_tokyonight_transparent()
-  tn_state.transparent = not tn_state.transparent
-  set_tokyonight_style(tn_state.style)
-  pcall(vim.notify, "Tokyonight transparent: " .. tostring(tn_state.transparent), vim.log.levels.INFO)
+	tn_state.transparent = not tn_state.transparent
+	set_tokyonight_style(tn_state.style)
+	pcall(vim.notify, "Tokyonight transparent: " .. tostring(tn_state.transparent), vim.log.levels.INFO)
 end
 
 local function toggle_tokyonight_italics()
-  tn_state.italic.comments = not tn_state.italic.comments
-  tn_state.italic.keywords = not tn_state.italic.keywords
-  set_tokyonight_style(tn_state.style)
-  pcall(vim.notify, string.format("Tokyonight italics (comments/keywords): %s", tn_state.italic.comments and "on" or "off"), vim.log.levels.INFO)
+	tn_state.italic.comments = not tn_state.italic.comments
+	tn_state.italic.keywords = not tn_state.italic.keywords
+	set_tokyonight_style(tn_state.style)
+	pcall(
+		vim.notify,
+		string.format("Tokyonight italics (comments/keywords): %s", tn_state.italic.comments and "on" or "off"),
+		vim.log.levels.INFO
+	)
 end
 
-vim.api.nvim_create_user_command("TokyonightNight", function() set_tokyonight_style("night") end, {})
-vim.api.nvim_create_user_command("TokyonightStorm", function() set_tokyonight_style("storm") end, {})
-vim.api.nvim_create_user_command("TokyonightMoon", function() set_tokyonight_style("moon") end, {})
-vim.api.nvim_create_user_command("Cobalt2Enable", function()
-  vim.cmd.colorscheme("cobalt2")
-  pcall(vim.notify, "Cobalt2 enabled", vim.log.levels.INFO)
+vim.api.nvim_create_user_command("TokyonightNight", function()
+	set_tokyonight_style("night")
 end, {})
-vim.api.nvim_create_user_command("TokyonightTransparentToggle", function() toggle_tokyonight_transparent() end, {})
-vim.api.nvim_create_user_command("TokyonightItalicsToggle", function() toggle_tokyonight_italics() end, {})
+vim.api.nvim_create_user_command("TokyonightStorm", function()
+	set_tokyonight_style("storm")
+end, {})
+vim.api.nvim_create_user_command("TokyonightMoon", function()
+	set_tokyonight_style("moon")
+end, {})
+vim.api.nvim_create_user_command("Cobalt2Enable", function()
+	vim.cmd.colorscheme("cobalt2")
+	pcall(vim.notify, "Cobalt2 enabled", vim.log.levels.INFO)
+end, {})
+vim.api.nvim_create_user_command("TokyonightTransparentToggle", function()
+	toggle_tokyonight_transparent()
+end, {})
+vim.api.nvim_create_user_command("TokyonightItalicsToggle", function()
+	toggle_tokyonight_italics()
+end, {})
 
-vim.keymap.set("n", "<leader>un", function() set_tokyonight_style("night") end, { desc = "Theme: Tokyonight Night" })
-vim.keymap.set("n", "<leader>us", function() set_tokyonight_style("storm") end, { desc = "Theme: Tokyonight Storm" })
-vim.keymap.set("n", "<leader>um", function() set_tokyonight_style("moon") end, { desc = "Theme: Tokyonight Moon" })
-vim.keymap.set("n", "<leader>uc", function() vim.cmd.colorscheme("cobalt2") end, { desc = "Theme: Cobalt2" })
-vim.keymap.set("n", "<leader>ut", function() toggle_tokyonight_transparent() end, { desc = "Theme: Transparent toggle" })
-vim.keymap.set("n", "<leader>ui", function() toggle_tokyonight_italics() end, { desc = "Theme: Italics toggle" })
+vim.keymap.set("n", "<leader>un", function()
+	set_tokyonight_style("night")
+end, { desc = "Theme: Tokyonight Night" })
+vim.keymap.set("n", "<leader>us", function()
+	set_tokyonight_style("storm")
+end, { desc = "Theme: Tokyonight Storm" })
+vim.keymap.set("n", "<leader>um", function()
+	set_tokyonight_style("moon")
+end, { desc = "Theme: Tokyonight Moon" })
+vim.keymap.set("n", "<leader>uc", function()
+	vim.cmd.colorscheme("cobalt2")
+end, { desc = "Theme: Cobalt2" })
+vim.keymap.set("n", "<leader>ut", function()
+	toggle_tokyonight_transparent()
+end, { desc = "Theme: Transparent toggle" })
+vim.keymap.set("n", "<leader>ui", function()
+	toggle_tokyonight_italics()
+end, { desc = "Theme: Italics toggle" })
 
 -- Markdown プレビュー系ショートカット
 vim.keymap.set("n", "<leader>mg", ":Glow<CR>", { desc = "Markdown: Glow preview" })
@@ -908,20 +969,20 @@ vim.keymap.set("n", "<leader>mp", ":MarkdownPreviewToggle<CR>", { desc = "Markdo
 
 -- GUI クライアント（neovide）使用時: フォント/透過/ぼかしを WezTerm に近づける
 pcall(function()
-  if vim.g.neovide then
-    vim.o.guifont = "MesloLGS NF:h14"
-    vim.g.neovide_transparency = 0.65
-    vim.g.neovide_floating_blur_amount_x = 10
-    vim.g.neovide_floating_blur_amount_y = 10
-  end
+	if vim.g.neovide then
+		vim.o.guifont = "MesloLGS NF:h14"
+		vim.g.neovide_transparency = 0.65
+		vim.g.neovide_floating_blur_amount_x = 10
+		vim.g.neovide_floating_blur_amount_y = 10
+	end
 end)
 
 local cmp = require("cmp")
 local lspkind = require("lspkind")
 -- VSCode風のアイコンを付与
 lspkind.init({
-  mode = "symbol_text",
-  preset = "default",
+	mode = "symbol_text",
+	preset = "default",
 })
 
 cmp.setup({
@@ -963,9 +1024,9 @@ cmp.setup({
 -- autopairs（括弧補完）と cmp の連携
 local ok_pairs, npairs = pcall(require, "nvim-autopairs")
 if ok_pairs then
-  npairs.setup({})
-  local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-  cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+	npairs.setup({})
+	local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+	cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 end
 
 -- LSP設定
@@ -987,7 +1048,7 @@ end
 
 -- 明示的に neodev を初期化（lua_ls 設定前に実行）
 pcall(function()
-    require("neodev").setup({ library = { types = true } })
+	require("neodev").setup({ library = { types = true } })
 end)
 
 local mlsp = require("mason-lspconfig")
@@ -1006,8 +1067,8 @@ mlsp.setup({
 
 -- Mason のインストール先を自動的に使う共通ハンドラ（古いバージョンでも動くようフォールバック）
 local function setup_server(server)
-    local opts = { capabilities = capabilities, on_attach = on_attach }
-    if server == "yamlls" then
+	local opts = { capabilities = capabilities, on_attach = on_attach }
+	if server == "yamlls" then
 		opts.settings = {
 			yaml = {
 				keyOrdering = false,
@@ -1025,27 +1086,34 @@ local function setup_server(server)
 				schemas = require("schemastore").json.schemas(),
 			},
 		}
-    elseif server == "lua_ls" then
-        -- neodev による型情報を前提にしつつ、明示的に設定を補強
-        local runtime_files = vim.api.nvim_get_runtime_file("", true)
-        opts.settings = {
-            Lua = {
-                runtime = { version = "LuaJIT" },
-                diagnostics = {
-                    globals = { "vim" },
-                    -- 必要なら undefined-global を抑制: disable = { "undefined-global" },
-                },
-                workspace = {
-                    checkThirdParty = false,
-                    library = runtime_files,
-                },
-                completion = { callSnippet = "Replace" },
-                hint = { enable = true },
-                telemetry = { enable = false },
-            },
-        }
-    end
-    lspconfig[server].setup(opts)
+	elseif server == "lua_ls" then
+		-- neodev による型情報を前提にしつつ、明示的に設定を補強
+		local runtime_files = vim.api.nvim_get_runtime_file("", true)
+		opts.settings = {
+			Lua = {
+				runtime = { version = "LuaJIT" },
+				diagnostics = {
+					globals = { "vim" },
+					-- 必要なら undefined-global を抑制: disable = { "undefined-global" },
+				},
+				workspace = {
+					checkThirdParty = false,
+					library = runtime_files,
+				},
+				completion = { callSnippet = "Replace" },
+				hint = { enable = true },
+				telemetry = { enable = false },
+			},
+		}
+	end
+	local cfg = rawget(lspconfig, server)
+	if cfg and type(cfg.setup) == "function" then
+		cfg.setup(opts)
+	else
+		vim.schedule(function()
+			vim.notify("Skip unknown LSP server: " .. tostring(server), vim.log.levels.WARN)
+		end)
+	end
 end
 
 if type(mlsp.setup_handlers) == "function" then
@@ -1117,31 +1185,31 @@ vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
 -- 便利: 保存時に末尾空白削除（VSCode設定に準拠）
 local trim_group = vim.api.nvim_create_augroup("TrimWhitespaceOnSave", { clear = true })
 vim.api.nvim_create_autocmd("BufWritePre", {
-    group = trim_group,
-    pattern = "*",
-    callback = function()
-        vim.cmd([[%s/\s\+$//e]])
-    end,
+	group = trim_group,
+	pattern = "*",
+	callback = function()
+		vim.cmd([[%s/\s\+$//e]])
+	end,
 })
 
 -- Lua/設定系ではスペルチェックを自動無効化
 local spell_group = vim.api.nvim_create_augroup("SpellPolicy", { clear = true })
 vim.api.nvim_create_autocmd("FileType", {
-    group = spell_group,
-    pattern = { "lua", "vim", "vimdoc" },
-    callback = function()
-        vim.opt_local.spell = false
-    end,
+	group = spell_group,
+	pattern = { "lua", "vim", "vimdoc" },
+	callback = function()
+		vim.opt_local.spell = false
+	end,
 })
 
 -- 診断の下線スタイルはカラースキーム（例: Tokyonight の undercurl）に委譲
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    group = spell_group,
-    callback = function(args)
-        local cfg = vim.fs.normalize(vim.fn.stdpath("config"))
-        local file = vim.fs.normalize(vim.api.nvim_buf_get_name(args.buf))
-        if file:find(cfg, 1, true) == 1 then
-            vim.opt_local.spell = false
-        end
-    end,
+	group = spell_group,
+	callback = function(args)
+		local cfg = vim.fs.normalize(vim.fn.stdpath("config"))
+		local file = vim.fs.normalize(vim.api.nvim_buf_get_name(args.buf))
+		if file:find(cfg, 1, true) == 1 then
+			vim.opt_local.spell = false
+		end
+	end,
 })
