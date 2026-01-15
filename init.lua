@@ -160,6 +160,16 @@ require("lazy").setup({
         end,
     },
 
+    -- Neovim Lua 開発補助（lua_ls に Neovim API 型情報を付与）
+    {
+        "folke/neodev.nvim",
+        lazy = false,
+        priority = 900,
+        opts = {
+            library = { types = true }, -- vim.*, luv.* の型情報
+        },
+    },
+
 	-- Treesitter（基本の構文強調）
 	{
 		"nvim-treesitter/nvim-treesitter",
@@ -417,11 +427,19 @@ require("lazy").setup({
         "nvim-lualine/lualine.nvim",
         dependencies = { "nvim-tree/nvim-web-devicons" },
         config = function()
-            local ok_colors, tn_colors = pcall(require, "tokyonight.colors")
-            local c = ok_colors and tn_colors.setup() or {}
+            local function hl_fg(name)
+                local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
+                if ok and hl and hl.fg then
+                    return string.format("#%06x", hl.fg)
+                end
+                return nil
+            end
+            local added = hl_fg("GitSignsAdd") or hl_fg("DiffAdd")
+            local modified = hl_fg("GitSignsChange") or hl_fg("DiffChange")
+            local removed = hl_fg("GitSignsDelete") or hl_fg("DiffDelete")
             require("lualine").setup({
                 options = {
-                    theme = "tokyonight",
+                    theme = "auto", -- 現在のカラースキームに追従
                     globalstatus = true,
                     component_separators = { left = "│", right = "│" },
                     section_separators = { left = "", right = "" },
@@ -435,11 +453,11 @@ require("lazy").setup({
                             "diff",
                             symbols = { added = " ", modified = " ", removed = " " },
                             colored = true,
-                            -- Tokyonight パレットに寄せる（存在しない場合はハイライトに委譲）
-                            diff_color = c and {
-                                added = { fg = c.green },
-                                modified = { fg = c.yellow },
-                                removed = { fg = c.red },
+                            -- 現在のハイライトから色を取得（なければテーマに委譲）
+                            diff_color = (added or modified or removed) and {
+                                added = added and { fg = added } or nil,
+                                modified = modified and { fg = modified } or nil,
+                                removed = removed and { fg = removed } or nil,
                             } or nil,
                         },
                     },
@@ -495,6 +513,7 @@ require("lazy").setup({
 				{ "<leader>un", desc = "Tokyonight: Night" },
 				{ "<leader>us", desc = "Tokyonight: Storm" },
 				{ "<leader>um", desc = "Tokyonight: Moon" },
+				{ "<leader>uc", desc = "Cobalt2" },
 				{ "<leader>ut", desc = "Tokyonight: Transparent toggle" },
 				{ "<leader>ui", desc = "Tokyonight: Italics toggle" },
 				{ "<leader>a", group = "AI/MCP" },
@@ -559,13 +578,18 @@ require("lazy").setup({
 		"shellRaining/hlchunk.nvim",
 		event = { "BufReadPre", "BufNewFile" },
 		config = function()
-			local function hlchunk_colors()
-				local ok, tn = pcall(require, "tokyonight.colors")
-				if ok then
-					local c = tn.setup()
-					return { normal = c.cyan or c.blue, error = c.magenta or c.red }
+			local function hl_fg(name)
+				local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
+				if ok and hl and hl.fg then
+					return string.format("#%06x", hl.fg)
 				end
-				return { normal = "#7dcfff", error = "#bb9af7" }
+				return nil
+			end
+			local function hlchunk_colors()
+				-- 現在のテーマの代表色を参照
+				local normal = hl_fg("Function") or hl_fg("Type") or "#7dcfff"
+				local error = hl_fg("DiagnosticError") or hl_fg("Error") or "#bb9af7"
+				return { normal = normal, error = error }
 			end
 
 			require("hlchunk").setup({
@@ -605,13 +629,7 @@ require("lazy").setup({
 				group = vim.api.nvim_create_augroup("HlchunkTokyonightColors", { clear = true }),
 				pattern = "*",
 				callback = function()
-					local c = (function()
-						local ok, tn = pcall(require, "tokyonight.colors")
-						if ok then
-							local cc = tn.setup(); return { normal = cc.cyan or cc.blue, error = cc.magenta or cc.red }
-						end
-						return { normal = "#7dcfff", error = "#bb9af7" }
-					end)()
+					local c = hlchunk_colors()
 					pcall(require("hlchunk").setup, { chunk = { style = { { fg = c.normal }, { fg = c.error } } } })
 				end,
 			})
@@ -791,12 +809,17 @@ end
 vim.api.nvim_create_user_command("TokyonightNight", function() set_tokyonight_style("night") end, {})
 vim.api.nvim_create_user_command("TokyonightStorm", function() set_tokyonight_style("storm") end, {})
 vim.api.nvim_create_user_command("TokyonightMoon", function() set_tokyonight_style("moon") end, {})
+vim.api.nvim_create_user_command("Cobalt2Enable", function()
+  vim.cmd.colorscheme("cobalt2")
+  pcall(vim.notify, "Cobalt2 enabled", vim.log.levels.INFO)
+end, {})
 vim.api.nvim_create_user_command("TokyonightTransparentToggle", function() toggle_tokyonight_transparent() end, {})
 vim.api.nvim_create_user_command("TokyonightItalicsToggle", function() toggle_tokyonight_italics() end, {})
 
 vim.keymap.set("n", "<leader>un", function() set_tokyonight_style("night") end, { desc = "Theme: Tokyonight Night" })
 vim.keymap.set("n", "<leader>us", function() set_tokyonight_style("storm") end, { desc = "Theme: Tokyonight Storm" })
 vim.keymap.set("n", "<leader>um", function() set_tokyonight_style("moon") end, { desc = "Theme: Tokyonight Moon" })
+vim.keymap.set("n", "<leader>uc", function() vim.cmd.colorscheme("cobalt2") end, { desc = "Theme: Cobalt2" })
 vim.keymap.set("n", "<leader>ut", function() toggle_tokyonight_transparent() end, { desc = "Theme: Transparent toggle" })
 vim.keymap.set("n", "<leader>ui", function() toggle_tokyonight_italics() end, { desc = "Theme: Italics toggle" })
 
@@ -840,6 +863,11 @@ local on_attach = function(_, bufnr)
 	map("n", "<leader>e", vim.diagnostic.open_float, "Line Diagnostics")
 end
 
+-- 明示的に neodev を初期化（lua_ls 設定前に実行）
+pcall(function()
+    require("neodev").setup({ library = { types = true } })
+end)
+
 local mlsp = require("mason-lspconfig")
 mlsp.setup({
 	ensure_installed = {
@@ -856,8 +884,8 @@ mlsp.setup({
 
 -- Mason のインストール先を自動的に使う共通ハンドラ（古いバージョンでも動くようフォールバック）
 local function setup_server(server)
-	local opts = { capabilities = capabilities, on_attach = on_attach }
-	if server == "yamlls" then
+    local opts = { capabilities = capabilities, on_attach = on_attach }
+    if server == "yamlls" then
 		opts.settings = {
 			yaml = {
 				keyOrdering = false,
@@ -875,15 +903,27 @@ local function setup_server(server)
 				schemas = require("schemastore").json.schemas(),
 			},
 		}
-	elseif server == "lua_ls" then
-		opts.settings = {
-			Lua = {
-				diagnostics = { globals = { "vim" } },
-				workspace = { checkThirdParty = false },
-			},
-		}
-	end
-	lspconfig[server].setup(opts)
+    elseif server == "lua_ls" then
+        -- neodev による型情報を前提にしつつ、明示的に設定を補強
+        local runtime_files = vim.api.nvim_get_runtime_file("", true)
+        opts.settings = {
+            Lua = {
+                runtime = { version = "LuaJIT" },
+                diagnostics = {
+                    globals = { "vim" },
+                    -- 必要なら undefined-global を抑制: disable = { "undefined-global" },
+                },
+                workspace = {
+                    checkThirdParty = false,
+                    library = runtime_files,
+                },
+                completion = { callSnippet = "Replace" },
+                hint = { enable = true },
+                telemetry = { enable = false },
+            },
+        }
+    end
+    lspconfig[server].setup(opts)
 end
 
 if type(mlsp.setup_handlers) == "function" then
@@ -955,9 +995,53 @@ vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
 -- 便利: 保存時に末尾空白削除（VSCode設定に準拠）
 local trim_group = vim.api.nvim_create_augroup("TrimWhitespaceOnSave", { clear = true })
 vim.api.nvim_create_autocmd("BufWritePre", {
-	group = trim_group,
-	pattern = "*",
-	callback = function()
-		vim.cmd([[%s/\s\+$//e]])
-	end,
+    group = trim_group,
+    pattern = "*",
+    callback = function()
+        vim.cmd([[%s/\s\+$//e]])
+    end,
+})
+
+-- Lua/設定系ではスペルチェックを自動無効化
+local spell_group = vim.api.nvim_create_augroup("SpellPolicy", { clear = true })
+vim.api.nvim_create_autocmd("FileType", {
+    group = spell_group,
+    pattern = { "lua", "vim", "vimdoc" },
+    callback = function()
+        vim.opt_local.spell = false
+    end,
+})
+
+-- 診断の見え方を調整（波線→直線、設定配下はエラーのみ下線）
+local function apply_diag_highlights()
+    for _, g in ipairs({ "Error", "Warn", "Info", "Hint" }) do
+        pcall(vim.api.nvim_set_hl, 0, "DiagnosticUnderline" .. g, { underline = true, undercurl = false })
+    end
+end
+apply_diag_highlights()
+vim.api.nvim_create_autocmd("ColorScheme", {
+    group = vim.api.nvim_create_augroup("DiagHLStyle", { clear = true }),
+    callback = apply_diag_highlights,
+})
+
+-- ~/.config/nvim 配下では、下線は Error のみ（Warn/Info/Hint は下線しない）
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+    group = vim.api.nvim_create_augroup("DiagStyleLocal", { clear = true }),
+    callback = function(args)
+        local cfg = vim.fs.normalize(vim.fn.stdpath("config"))
+        local file = vim.fs.normalize(vim.api.nvim_buf_get_name(args.buf))
+        if file:find(cfg, 1, true) == 1 then
+            vim.diagnostic.config({ underline = { severity = { min = vim.diagnostic.severity.ERROR } } }, args.buf)
+        end
+    end,
+})
+vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+    group = spell_group,
+    callback = function(args)
+        local cfg = vim.fs.normalize(vim.fn.stdpath("config"))
+        local file = vim.fs.normalize(vim.api.nvim_buf_get_name(args.buf))
+        if file:find(cfg, 1, true) == 1 then
+            vim.opt_local.spell = false
+        end
+    end,
 })

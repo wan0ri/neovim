@@ -29,6 +29,8 @@
   - 変更例: `:lua require('tokyonight').setup({ style = 'storm' }); vim.cmd.colorscheme('tokyonight')`
 - which-key からの簡易切替: `<leader>un`（night）, `<leader>us`（storm）, `<leader>um`（moon）
   - 追加トグル: `<leader>ut`（transparent 切替）, `<leader>ui`（comments/keywords 斜体の切替）
+- cobalt2.nvim（Cobalt2 Theme Official 互換）
+  - 切替: `<leader>uc` または `:Cobalt2Enable`
 - vscode.nvim（代替）
 - cobalt2.nvim（代替・必要時のみ手動適用）
 
@@ -79,6 +81,9 @@
 
 - mason.nvim / mason-lspconfig.nvim / nvim-lspconfig
   - `:Mason` でツール管理。主要サーバは `init.lua` の `ensure_installed` に列挙
+
+- neodev.nvim（Lua 開発補助）
+  - lua_ls に Neovim API の型情報を提供し、`vim.*` の誤検知を軽減
 
 - nvim-cmp + LuaSnip
   - 補完エンジン。`<CR>` で確定（自動確定は無効）
