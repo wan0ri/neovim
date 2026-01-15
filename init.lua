@@ -642,11 +642,14 @@ require("lazy").setup({
 	{ "neovim/nvim-lspconfig" },
 	{ "hrsh7th/nvim-cmp" },
 	{ "hrsh7th/cmp-nvim-lsp" },
+	{ "hrsh7th/cmp-nvim-lsp-signature-help" },
 	{ "hrsh7th/cmp-buffer" },
 	{ "hrsh7th/cmp-path" },
 	{ "L3MON4D3/LuaSnip" },
 	{ "saadparwaiz1/cmp_luasnip" },
 	{ "rafamadriz/friendly-snippets" },
+	{ "onsails/lspkind.nvim" },
+	{ "windwp/nvim-autopairs" },
 	{ "b0o/SchemaStore.nvim" },
 	{ "stevearc/conform.nvim" },
 	{ "mfussenegger/nvim-lint" },
@@ -823,8 +826,14 @@ vim.keymap.set("n", "<leader>uc", function() vim.cmd.colorscheme("cobalt2") end,
 vim.keymap.set("n", "<leader>ut", function() toggle_tokyonight_transparent() end, { desc = "Theme: Transparent toggle" })
 vim.keymap.set("n", "<leader>ui", function() toggle_tokyonight_italics() end, { desc = "Theme: Italics toggle" })
 
--- nvim-cmp（Enterで自動確定しない: VSCodeの acceptSuggestionOnEnter=off 相当）
 local cmp = require("cmp")
+local lspkind = require("lspkind")
+-- VSCode風のアイコンを付与
+lspkind.init({
+  mode = "symbol_text",
+  preset = "default",
+})
+
 cmp.setup({
 	snippet = {
 		expand = function(args)
@@ -839,12 +848,35 @@ cmp.setup({
 	}),
 	sources = {
 		{ name = "nvim_lsp" },
+		{ name = "nvim_lsp_signature_help" },
 		{ name = "path" },
 		{ name = "buffer" },
+	},
+	formatting = {
+		format = lspkind.cmp_format({
+			mode = "symbol_text",
+			menu = {
+				nvim_lsp = "[LSP]",
+				nvim_lsp_signature_help = "[Sig]",
+				buffer = "[Buf]",
+				path = "[Path]",
+				luasnip = "[Snip]",
+			},
+			maxwidth = 50,
+			ellipsis_char = "…",
+		}),
 	},
 	preselect = cmp.PreselectMode.None,
 	completion = { completeopt = "menu,menuone,noinsert" },
 })
+
+-- autopairs（括弧補完）と cmp の連携
+local ok_pairs, npairs = pcall(require, "nvim-autopairs")
+if ok_pairs then
+  npairs.setup({})
+  local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+  cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+end
 
 -- LSP設定
 local lspconfig = require("lspconfig")

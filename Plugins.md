@@ -85,6 +85,14 @@
 - neodev.nvim（Lua 開発補助）
   - lua_ls に Neovim API の型情報を提供し、`vim.*` の誤検知を軽減
 
+- nvim-cmp（補完エンジン）
+  - `<C-Space>` で補完メニュー、`<Tab>/<S-Tab>` で移動、`<CR>` で確定
+  - ソース: `nvim_lsp` / `nvim_lsp_signature_help` / `path` / `buffer` / `luasnip`
+  - 付加機能:
+    - lspkind.nvim（VSCode風アイコン/ラベル）
+    - cmp-nvim-lsp-signature-help（関数シグネチャを補完候補に同居）
+    - nvim-autopairs（括弧の自動補完。確定時の括弧連携）
+
 - nvim-cmp + LuaSnip
   - 補完エンジン。`<CR>` で確定（自動確定は無効）
 
