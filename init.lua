@@ -77,64 +77,88 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-	-- テーマ（VSCode）: 併用可能。既定は cobalt2 を適用するため、ここでは切替のみ準備。
-	{
-		"Mofiqul/vscode.nvim",
-		config = function()
-			require("vscode").setup({ transparent = false })
-			-- デフォルト適用はしない（cobalt2 を後段で適用）
-			-- vim.cmd.colorscheme("vscode")
-		end,
-	},
-	-- Cobalt2 テーマ（VSCode Cobalt2 に近い配色）
-	{ "rktjmp/lush.nvim" },
-	{ "tjdevries/colorbuddy.nvim" },
-	{
-		"lalitmee/cobalt2.nvim",
-		lazy = false,
-		priority = 1000,
-		config = function()
-			local ok = pcall(function()
-				require("cobalt2").setup({})
-				vim.cmd.colorscheme("cobalt2")
-			end)
-			if not ok then
-				vim.cmd.colorscheme("vscode")
-			end
-			-- 透過を生かしたい場合は下記を有効化
-			-- vim.api.nvim_set_hl(0, "Normal",      { bg = "none" })
-			-- vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
-			-- Treesitter ハイライトの色分けを追加（Cobalt2 の色味に寄せる）
-			local set = vim.api.nvim_set_hl
-			local colors = {
-				cyan = "#9EFFFF",
-				yellow = "#FFC600",
-				orange = "#FF9D00",
-				green = "#A5FF90",
-				pink = "#FF6C99",
-				blue = "#22C7FF",
-				fg = "#E1EFFF",
-			}
-			set(0, "@string", { fg = colors.green })
-			set(0, "@number", { fg = colors.orange })
-			set(0, "@boolean", { fg = colors.orange })
-			set(0, "@constant", { fg = colors.pink })
-			set(0, "@keyword", { fg = colors.blue, italic = true })
-			set(0, "@type", { fg = colors.cyan })
-			set(0, "@type.builtin", { fg = colors.cyan, italic = true })
-			set(0, "@function", { fg = colors.cyan, bold = true })
-			set(0, "@method", { fg = colors.cyan })
-			set(0, "@property", { fg = colors.yellow })
-			set(0, "@field", { fg = colors.yellow })
-			set(0, "@label", { fg = colors.yellow })
-			set(0, "@variable", { fg = colors.fg })
-			-- Terraform/HCL 強化（ある場合のみ適用）
-			pcall(set, 0, "@attribute.hcl", { fg = colors.yellow })
-			pcall(set, 0, "@property.hcl", { fg = colors.yellow })
-			pcall(set, 0, "@type.terraform", { fg = colors.cyan })
-			pcall(set, 0, "@property.terraform", { fg = colors.yellow })
-		end,
-	},
+    -- テーマ（Tokyonight を既定適用。VSCode/cobalt2 は切替用）
+    {
+        "folke/tokyonight.nvim",
+        lazy = false,
+        priority = 1000,
+        opts = {
+            style = "night",
+            transparent = false,
+            terminal_colors = true,
+            styles = {
+                comments = { italic = true },
+                keywords = { italic = false },
+                functions = { bold = true },
+                variables = {},
+                sidebars = "dark",
+                floats = "dark",
+            },
+            lualine_bold = true,
+        },
+        config = function(_, opts)
+            require("tokyonight").setup(opts)
+            vim.cmd.colorscheme("tokyonight")
+        end,
+    },
+    {
+        "Mofiqul/vscode.nvim",
+        config = function()
+            require("vscode").setup({ transparent = false })
+            -- vim.cmd.colorscheme("vscode") -- 必要時に手動で切替
+        end,
+    },
+    -- Cobalt2 テーマ（切替用。既定では適用しない）
+    { "rktjmp/lush.nvim" },
+    { "tjdevries/colorbuddy.nvim" },
+    {
+        "lalitmee/cobalt2.nvim",
+        lazy = false,
+        priority = 999,
+        config = function()
+            -- cobalt2 を選んだ時だけ追加調整を適用
+            local function apply_cobalt2_extras()
+                local set = vim.api.nvim_set_hl
+                local colors = {
+                    cyan = "#9EFFFF",
+                    yellow = "#FFC600",
+                    orange = "#FF9D00",
+                    green = "#A5FF90",
+                    pink = "#FF6C99",
+                    blue = "#22C7FF",
+                    fg = "#E1EFFF",
+                }
+                set(0, "@string", { fg = colors.green })
+                set(0, "@number", { fg = colors.orange })
+                set(0, "@boolean", { fg = colors.orange })
+                set(0, "@constant", { fg = colors.pink })
+                set(0, "@keyword", { fg = colors.blue, italic = true })
+                set(0, "@type", { fg = colors.cyan })
+                set(0, "@type.builtin", { fg = colors.cyan, italic = true })
+                set(0, "@function", { fg = colors.cyan, bold = true })
+                set(0, "@method", { fg = colors.cyan })
+                set(0, "@property", { fg = colors.yellow })
+                set(0, "@field", { fg = colors.yellow })
+                set(0, "@label", { fg = colors.yellow })
+                set(0, "@variable", { fg = colors.fg })
+                -- Terraform/HCL 強化（ある場合のみ適用）
+                pcall(set, 0, "@attribute.hcl", { fg = colors.yellow })
+                pcall(set, 0, "@property.hcl", { fg = colors.yellow })
+                pcall(set, 0, "@type.terraform", { fg = colors.cyan })
+                pcall(set, 0, "@property.terraform", { fg = colors.yellow })
+            end
+
+            -- 既定で cobalt2 を強制適用しない。
+            -- cobalt2 を選択した時だけ上記調整をかける。
+            if vim.g.colors_name == "cobalt2" then
+                apply_cobalt2_extras()
+            end
+            vim.api.nvim_create_autocmd("ColorScheme", {
+                pattern = "cobalt2",
+                callback = apply_cobalt2_extras,
+            })
+        end,
+    },
 
 	-- Treesitter（基本の構文強調）
 	{
@@ -241,13 +265,10 @@ require("lazy").setup({
 			start_in_insert = true,
 			persist_mode = false,
 			close_on_exit = true,
-			-- Cobalt2 に合わせた境界線色（フロート時）
-			highlights = {
-				FloatBorder = { guifg = "#22C7FF" },
-			},
 		},
-		config = function(_, opts)
-			require("toggleterm").setup(opts)
+        config = function(_, opts)
+            -- ハイライトはテーマ（Tokyonight）の FloatBorder/NormalFloat に完全委譲
+            require("toggleterm").setup(opts)
 
 			-- Lazygit 連携（Git ルートで開くフロート端末）
 			local Terminal = require("toggleterm.terminal").Terminal
@@ -391,14 +412,67 @@ require("lazy").setup({
 		end,
 	},
 
-	-- ステータスライン
-	{
-		"nvim-lualine/lualine.nvim",
-		dependencies = { "nvim-tree/nvim-web-devicons" },
-		config = function()
-			require("lualine").setup({ options = { theme = "auto" } })
-		end,
-	},
+    -- ステータスライン（診断/Git/情報を出し分け）
+    {
+        "nvim-lualine/lualine.nvim",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        config = function()
+            local ok_colors, tn_colors = pcall(require, "tokyonight.colors")
+            local c = ok_colors and tn_colors.setup() or {}
+            require("lualine").setup({
+                options = {
+                    theme = "tokyonight",
+                    globalstatus = true,
+                    component_separators = { left = "│", right = "│" },
+                    section_separators = { left = "", right = "" },
+                    disabled_filetypes = { statusline = { "dashboard", "neo-tree" } },
+                },
+                sections = {
+                    lualine_a = { { "mode", icon = "" } },
+                    lualine_b = {
+                        { "branch", icon = "" },
+                        {
+                            "diff",
+                            symbols = { added = " ", modified = " ", removed = " " },
+                            colored = true,
+                            -- Tokyonight パレットに寄せる（存在しない場合はハイライトに委譲）
+                            diff_color = c and {
+                                added = { fg = c.green },
+                                modified = { fg = c.yellow },
+                                removed = { fg = c.red },
+                            } or nil,
+                        },
+                    },
+                    lualine_c = {
+                        { "filename", path = 1, symbols = { modified = " [+]", readonly = " " } },
+                    },
+                    lualine_x = {
+                        {
+                            "diagnostics",
+                            sources = { "nvim_diagnostic" },
+                            sections = { "error", "warn", "info", "hint" },
+                            symbols = { error = " ", warn = " ", info = " ", hint = " " },
+                            colored = true,
+                            update_in_insert = false,
+                        },
+                        { "encoding", cond = function() return vim.o.fileencoding ~= "utf-8" end },
+                        { "fileformat" },
+                        { "filetype" },
+                    },
+                    lualine_y = { { "progress" } },
+                    lualine_z = { { "location" } },
+                },
+                inactive_sections = {
+                    lualine_a = {},
+                    lualine_b = {},
+                    lualine_c = { { "filename", path = 1 } },
+                    lualine_x = { "location" },
+                    lualine_y = {},
+                    lualine_z = {},
+                },
+            })
+        end,
+    },
 
 	-- Git 連携
 	{ "lewis6991/gitsigns.nvim", config = true },
@@ -417,6 +491,12 @@ require("lazy").setup({
 			local wk = require("which-key")
 			wk.setup({})
 			wk.add({
+				{ "<leader>u", group = "UI/Theme" },
+				{ "<leader>un", desc = "Tokyonight: Night" },
+				{ "<leader>us", desc = "Tokyonight: Storm" },
+				{ "<leader>um", desc = "Tokyonight: Moon" },
+				{ "<leader>ut", desc = "Tokyonight: Transparent toggle" },
+				{ "<leader>ui", desc = "Tokyonight: Italics toggle" },
 				{ "<leader>a", group = "AI/MCP" },
 				{ "<leader>ac", desc = "Codex TUI" },
 				{ "<leader>as", desc = "Open servers.json" },
@@ -479,15 +559,24 @@ require("lazy").setup({
 		"shellRaining/hlchunk.nvim",
 		event = { "BufReadPre", "BufNewFile" },
 		config = function()
+			local function hlchunk_colors()
+				local ok, tn = pcall(require, "tokyonight.colors")
+				if ok then
+					local c = tn.setup()
+					return { normal = c.cyan or c.blue, error = c.magenta or c.red }
+				end
+				return { normal = "#7dcfff", error = "#bb9af7" }
+			end
+
 			require("hlchunk").setup({
 				chunk = {
 					enable = true,
 					use_treesitter = true,
-					-- cobalt2 に合わせた色味（通常: シアン、エラー: ピンク）
-					style = {
-						{ fg = "#22C7FF" }, -- cobalt2 blue/cyan
-						{ fg = "#FF6C99" }, -- cobalt2 pink (error)
-					},
+					-- Tokyonight パレットに追従
+					style = (function()
+						local c = hlchunk_colors()
+						return { { fg = c.normal }, { fg = c.error } }
+					end)(),
 					chars = {
 						horizontal_line = "─",
 						vertical_line = "│",
@@ -509,6 +598,22 @@ require("lazy").setup({
 				indent = { enable = false }, -- indent-blankline と重複させない
 				line_num = { enable = false },
 				blank = { enable = false },
+			})
+
+			-- カラースキーム変更時にも追従
+			vim.api.nvim_create_autocmd("ColorScheme", {
+				group = vim.api.nvim_create_augroup("HlchunkTokyonightColors", { clear = true }),
+				pattern = "*",
+				callback = function()
+					local c = (function()
+						local ok, tn = pcall(require, "tokyonight.colors")
+						if ok then
+							local cc = tn.setup(); return { normal = cc.cyan or cc.blue, error = cc.magenta or cc.red }
+						end
+						return { normal = "#7dcfff", error = "#bb9af7" }
+					end)()
+					pcall(require("hlchunk").setup, { chunk = { style = { { fg = c.normal }, { fg = c.error } } } })
+				end,
 			})
 		end,
 	},
@@ -639,6 +744,61 @@ pcall(function()
 		api.toggle.linewise(vim.fn.visualmode())
 	end, { desc = "Toggle comment" })
 end)
+
+-- Tokyonight スタイル切替（night/storm/moon）
+-- Tokyonight: スタイル/透明度/イタリックのトグル
+local tn_state = { style = "night", transparent = false, italic = { comments = true, keywords = false } }
+
+local function apply_tokyonight(opts)
+  local ok, tn = pcall(require, "tokyonight")
+  if not ok then return end
+  tn.setup(opts)
+  vim.cmd.colorscheme("tokyonight")
+end
+
+local function set_tokyonight_style(style)
+  tn_state.style = style
+  apply_tokyonight({
+    style = tn_state.style,
+    transparent = tn_state.transparent,
+    terminal_colors = true,
+    styles = {
+      comments = { italic = tn_state.italic.comments },
+      keywords = { italic = tn_state.italic.keywords },
+      functions = { bold = true },
+      variables = {},
+      sidebars = "dark",
+      floats = "dark",
+    },
+    lualine_bold = true,
+  })
+  pcall(vim.notify, "Tokyonight style: " .. style, vim.log.levels.INFO)
+end
+
+local function toggle_tokyonight_transparent()
+  tn_state.transparent = not tn_state.transparent
+  set_tokyonight_style(tn_state.style)
+  pcall(vim.notify, "Tokyonight transparent: " .. tostring(tn_state.transparent), vim.log.levels.INFO)
+end
+
+local function toggle_tokyonight_italics()
+  tn_state.italic.comments = not tn_state.italic.comments
+  tn_state.italic.keywords = not tn_state.italic.keywords
+  set_tokyonight_style(tn_state.style)
+  pcall(vim.notify, string.format("Tokyonight italics (comments/keywords): %s", tn_state.italic.comments and "on" or "off"), vim.log.levels.INFO)
+end
+
+vim.api.nvim_create_user_command("TokyonightNight", function() set_tokyonight_style("night") end, {})
+vim.api.nvim_create_user_command("TokyonightStorm", function() set_tokyonight_style("storm") end, {})
+vim.api.nvim_create_user_command("TokyonightMoon", function() set_tokyonight_style("moon") end, {})
+vim.api.nvim_create_user_command("TokyonightTransparentToggle", function() toggle_tokyonight_transparent() end, {})
+vim.api.nvim_create_user_command("TokyonightItalicsToggle", function() toggle_tokyonight_italics() end, {})
+
+vim.keymap.set("n", "<leader>un", function() set_tokyonight_style("night") end, { desc = "Theme: Tokyonight Night" })
+vim.keymap.set("n", "<leader>us", function() set_tokyonight_style("storm") end, { desc = "Theme: Tokyonight Storm" })
+vim.keymap.set("n", "<leader>um", function() set_tokyonight_style("moon") end, { desc = "Theme: Tokyonight Moon" })
+vim.keymap.set("n", "<leader>ut", function() toggle_tokyonight_transparent() end, { desc = "Theme: Transparent toggle" })
+vim.keymap.set("n", "<leader>ui", function() toggle_tokyonight_italics() end, { desc = "Theme: Italics toggle" })
 
 -- nvim-cmp（Enterで自動確定しない: VSCodeの acceptSuggestionOnEnter=off 相当）
 local cmp = require("cmp")

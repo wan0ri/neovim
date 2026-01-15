@@ -11,14 +11,26 @@
   - `:Dashboard` / `Leader+dd`
 
 - lualine.nvim
-  - ステータスライン（自動設定）
+  - ステータスライン（Tokyonight テーマ）。Git（branch/diff）と診断（error/warn/info/hint）を色分け表示
 
 - indent-blankline.nvim（ibl）
   - インデントガイド。`dashboard` や `neo-tree` では非表示
 
 - hlchunk.nvim
   - ブロック（関数/if など）の境界を可視化
-  - Cobalt2 に合わせた色で描画（通常: `#22C7FF`, エラー: `#FF6C99`）
+  - Tokyonight パレットに追従（通常: cyan/blue、エラー: magenta/red）
+
+---
+
+## カラースキーム
+
+- tokyonight.nvim（既定）
+  - 現行スタイル: `night`（透過なし）
+  - 変更例: `:lua require('tokyonight').setup({ style = 'storm' }); vim.cmd.colorscheme('tokyonight')`
+- which-key からの簡易切替: `<leader>un`（night）, `<leader>us`（storm）, `<leader>um`（moon）
+  - 追加トグル: `<leader>ut`（transparent 切替）, `<leader>ui`（comments/keywords 斜体の切替）
+- vscode.nvim（代替）
+- cobalt2.nvim（代替・必要時のみ手動適用）
 
 - dropbar.nvim
   - ウィンバーにパンくず（クラス/関数/シンボル）表示
@@ -49,6 +61,7 @@
   - 下パネル: `&lt;leader&gt;tt`（または `&lt;leader&gt;`+バッククォートキー）
   - 右パネル: `<leader>tv`、フロート: `<leader>tf`
   - 端末内は `Esc` or `jk` でノーマル戻り
+  - フロート枠の色はカラースキーム（Tokyonight）の `FloatBorder` に委譲
 
 ---
 
