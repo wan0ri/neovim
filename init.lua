@@ -99,10 +99,10 @@ require("lazy").setup({
 		"folke/tokyonight.nvim",
 		lazy = false,
 		priority = 1000,
-		opts = {
-			style = "night",
-			transparent = false, -- 既定は不透明（必要時はトグルで透過）
-			terminal_colors = true,
+        opts = {
+            style = "night",
+            transparent = true, -- 既定は透過（WezTermのopacity/blurを反映）
+            terminal_colors = true,
 			styles = {
 				comments = { italic = true },
 				keywords = { italic = false },
@@ -122,11 +122,13 @@ require("lazy").setup({
 	{
 		"xiyaowong/nvim-transparent",
 		config = function()
-			require("transparent").setup({
-				enable = false, -- 既定はOFF（必要時に <leader>uT でON）
-				extra_groups = {
-					"NormalFloat",
-					"FloatBorder",
+        require("transparent").setup({
+                enable = true, -- 既定はON（起動時から透過）
+                extra_groups = {
+                    "Normal",
+                    "NormalNC",
+                    "NormalFloat",
+                    "FloatBorder",
 					"Pmenu",
 					"PmenuSel",
 					"TelescopeNormal",
@@ -877,7 +879,7 @@ end)
 
 -- Tokyonight スタイル切替（night/storm/moon）
 -- Tokyonight: スタイル/透明度/イタリックのトグル
-local tn_state = { style = "night", transparent = false, italic = { comments = true, keywords = false } }
+local tn_state = { style = "night", transparent = true, italic = { comments = true, keywords = false } }
 
 local function apply_tokyonight(opts)
 	local ok, tn = pcall(require, "tokyonight")
