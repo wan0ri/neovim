@@ -10,6 +10,10 @@
   - 起動時に最近ファイルとショートカットを表示
   - `:Dashboard` / `Leader+dd`
 
+- nvim-scrollbar
+  - 右端にスクロールバー＋マークを表示（検索/診断/Git 変更）
+  - 除外: `dashboard`, `neo-tree`, `help`, `lazy`, `mason`, `Telescope*`
+
 - lualine.nvim
   - ステータスライン（Tokyonight テーマ）。Git（branch/diff）と診断（error/warn/info/hint）を色分け表示
 
