@@ -47,6 +47,23 @@ if vim.env.TERRAFORM_CLOUD_TOKEN and (#vim.env.TERRAFORM_CLOUD_TOKEN > 0) then
 	end
 end
 
+-- macOS: Homebrew のパスを Neovim 起動時に補強（Glow/markdown-preview などのCLI検出安定化）
+pcall(function()
+  if (vim.loop.os_uname().sysname or ""):match("Darwin") then
+    local brew_paths = { "/opt/homebrew/bin", "/usr/local/bin" }
+    local path = vim.env.PATH or ""
+    local new = {}
+    for _, p in ipairs(brew_paths) do
+      if not path:find(p, 1, true) and vim.loop.fs_stat(p) then
+        table.insert(new, p)
+      end
+    end
+    if #new > 0 then
+      vim.env.PATH = table.concat(new, ":") .. ":" .. path
+    end
+  end
+end)
+
 -- 便利: .env の再読み込みコマンドと MCP 設定ファイルへジャンプ
 pcall(function()
 	vim.api.nvim_create_user_command("McpEnvReload", function()
@@ -523,11 +540,11 @@ require("lazy").setup({
 	-- which-key（キーチートシート）
 	{
 		"folke/which-key.nvim",
-		config = function()
-			local wk = require("which-key")
-			wk.setup({})
-			wk.add({
-				{ "<leader>u", group = "UI/Theme" },
+        config = function()
+            local wk = require("which-key")
+            wk.setup({})
+            wk.add({
+                { "<leader>u", group = "UI/Theme" },
 				{ "<leader>un", desc = "Tokyonight: Night" },
 				{ "<leader>us", desc = "Tokyonight: Storm" },
 				{ "<leader>um", desc = "Tokyonight: Moon" },
@@ -562,12 +579,15 @@ require("lazy").setup({
 				{ "<leader>c", group = "Copilot" },
 				{ "<leader>co", desc = "CopilotChat 開く" },
 				{ "<leader>cc", desc = "CopilotChat プロンプト" },
-				{ "<leader>cq", desc = "CopilotChat 閉じる" },
+                { "<leader>cq", desc = "CopilotChat 閉じる" },
 
-				{ "<leader>f", desc = "フォーマット" },
-			})
-		end,
-	},
+                { "<leader>f", desc = "フォーマット" },
+                { "<leader>m", group = "Markdown" },
+                { "<leader>mg", desc = "Glow プレビュー" },
+                { "<leader>mp", desc = "MarkdownPreview トグル" },
+            })
+        end,
+    },
 
 	-- インデントガイド（indent-rainbow代替）
 	{
@@ -879,6 +899,10 @@ vim.keymap.set("n", "<leader>um", function() set_tokyonight_style("moon") end, {
 vim.keymap.set("n", "<leader>uc", function() vim.cmd.colorscheme("cobalt2") end, { desc = "Theme: Cobalt2" })
 vim.keymap.set("n", "<leader>ut", function() toggle_tokyonight_transparent() end, { desc = "Theme: Transparent toggle" })
 vim.keymap.set("n", "<leader>ui", function() toggle_tokyonight_italics() end, { desc = "Theme: Italics toggle" })
+
+-- Markdown プレビュー系ショートカット
+vim.keymap.set("n", "<leader>mg", ":Glow<CR>", { desc = "Markdown: Glow preview" })
+vim.keymap.set("n", "<leader>mp", ":MarkdownPreviewToggle<CR>", { desc = "Markdown: Preview toggle" })
 
 -- GUI クライアント（neovide）使用時: フォント/透過/ぼかしを WezTerm に近づける
 pcall(function()

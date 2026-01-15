@@ -138,10 +138,12 @@
 
 - glow.nvim
   - `:Glow`（プレビュー、終了は `q`）
+  - ショートカット: `<leader>mg`
 
 - markdown-preview.nvim
   - `:MarkdownPreview` / `:MarkdownPreviewStop` / `:MarkdownPreviewToggle`
   - 既定ブラウザでプレビュー（保存で自動更新）。初回は Node.js が必要（`:Lazy sync` 後に自動ビルド）
+  - ショートカット: `<leader>mp`
 
 補足（Markdown 整形）
 
