@@ -744,6 +744,8 @@ require("lazy").setup({
 	-- Markdown（All in One / Table / Preview 代替）
 	{ "dhruvasagar/vim-table-mode" },
 	{ "ellisonleao/glow.nvim", config = true, cmd = "Glow" },
+	-- マルチカーソル（VSCode風の複数選択）
+	{ "mg979/vim-visual-multi" },
 	{
 		"iamcco/markdown-preview.nvim",
 		ft = { "markdown" },

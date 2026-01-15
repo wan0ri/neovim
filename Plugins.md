@@ -167,3 +167,11 @@
 
 - accelerated-jk.nvim
   - `j/k` 長押しで加速度スクロール
+
+## 編集支援 / マルチカーソル
+
+- vim-visual-multi（複数カーソル）
+  - 基本: カーソル下の単語を開始/次候補追加 → `Ctrl-n`（繰り返しで次の一致にカーソル追加）
+  - 縦方向にカーソル追加（端末が対応する場合）: `Ctrl-Up` / `Ctrl-Down`
+  - 終了: `Esc`
+  - 詳細チートシート: `:help visual-multi`, `:help vm-tutorial`
