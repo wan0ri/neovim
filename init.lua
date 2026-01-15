@@ -1012,29 +1012,7 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
--- 診断の見え方を調整（波線→直線、設定配下はエラーのみ下線）
-local function apply_diag_highlights()
-    for _, g in ipairs({ "Error", "Warn", "Info", "Hint" }) do
-        pcall(vim.api.nvim_set_hl, 0, "DiagnosticUnderline" .. g, { underline = true, undercurl = false })
-    end
-end
-apply_diag_highlights()
-vim.api.nvim_create_autocmd("ColorScheme", {
-    group = vim.api.nvim_create_augroup("DiagHLStyle", { clear = true }),
-    callback = apply_diag_highlights,
-})
-
--- ~/.config/nvim 配下では、下線は Error のみ（Warn/Info/Hint は下線しない）
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-    group = vim.api.nvim_create_augroup("DiagStyleLocal", { clear = true }),
-    callback = function(args)
-        local cfg = vim.fs.normalize(vim.fn.stdpath("config"))
-        local file = vim.fs.normalize(vim.api.nvim_buf_get_name(args.buf))
-        if file:find(cfg, 1, true) == 1 then
-            vim.diagnostic.config({ underline = { severity = { min = vim.diagnostic.severity.ERROR } } }, args.buf)
-        end
-    end,
-})
+-- 診断の下線スタイルはカラースキーム（例: Tokyonight の undercurl）に委譲
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
     group = spell_group,
     callback = function(args)
