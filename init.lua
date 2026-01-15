@@ -724,6 +724,22 @@ require("lazy").setup({
 	-- Markdown（All in One / Table / Preview 代替）
 	{ "dhruvasagar/vim-table-mode" },
 	{ "ellisonleao/glow.nvim", config = true, cmd = "Glow" },
+	{
+		"iamcco/markdown-preview.nvim",
+		ft = { "markdown" },
+		cmd = { "MarkdownPreview", "MarkdownPreviewToggle", "MarkdownPreviewStop" },
+		build = function()
+			-- Node.js がある場合はビルドしてローカルに viewer を用意
+			pcall(function() vim.fn["mkdp#util#install"]() end)
+		end,
+		init = function()
+			-- 既定ブラウザで開く（デフォルト）。ローカルサーバは 127.0.0.1:xxxx
+			vim.g.mkdp_open_to_the_world = 0
+			vim.g.mkdp_auto_close = 0
+			-- ページテーマはシステムに合わせる（light/dark 自動）
+			vim.g.mkdp_theme = "auto"
+		end,
+	},
 
 	-- Startup Dashboard
 	{

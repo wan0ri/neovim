@@ -139,6 +139,10 @@
 - glow.nvim
   - `:Glow`（プレビュー、終了は `q`）
 
+- markdown-preview.nvim
+  - `:MarkdownPreview` / `:MarkdownPreviewStop` / `:MarkdownPreviewToggle`
+  - 既定ブラウザでプレビュー（保存で自動更新）。初回は Node.js が必要（`:Lazy sync` 後に自動ビルド）
+
 補足（Markdown 整形）
 
 - 保存時に Prettierd → Prettier の順で利用できる方を自動選択して整形します
