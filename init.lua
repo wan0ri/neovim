@@ -84,7 +84,7 @@ require("lazy").setup({
         priority = 1000,
         opts = {
             style = "night",
-            transparent = false,
+            transparent = true, -- WezTerm 側の透過を活かす
             terminal_colors = true,
             styles = {
                 comments = { italic = true },
@@ -99,6 +99,24 @@ require("lazy").setup({
         config = function(_, opts)
             require("tokyonight").setup(opts)
             vim.cmd.colorscheme("tokyonight")
+        end,
+    },
+    -- 背景透過をプラグインで管理（トグル/除外が容易）
+    {
+        "xiyaowong/nvim-transparent",
+        config = function()
+            require("transparent").setup({
+                enable = true,
+                extra_groups = {
+                    "NormalFloat", "FloatBorder", "Pmenu", "PmenuSel",
+                    "TelescopeNormal", "TelescopeBorder", "TelescopePromptNormal",
+                    "TelescopeResultsNormal", "TelescopePromptBorder", "TelescopeResultsBorder",
+                    "NeoTreeNormal", "NeoTreeNormalNC", "WhichKeyFloat", "WhichKeyBorder",
+                    "MsgArea", "SignColumn",
+                },
+                exclude = {},
+            })
+            vim.keymap.set("n", "<leader>uT", ":TransparentToggle<CR>", { desc = "UI: Transparent toggle" })
         end,
     },
     {
@@ -516,6 +534,7 @@ require("lazy").setup({
 				{ "<leader>uc", desc = "Cobalt2" },
 				{ "<leader>ut", desc = "Tokyonight: Transparent toggle" },
 				{ "<leader>ui", desc = "Tokyonight: Italics toggle" },
+				{ "<leader>uT", desc = "Transparent: Toggle" },
 				{ "<leader>a", group = "AI/MCP" },
 				{ "<leader>ac", desc = "Codex TUI" },
 				{ "<leader>as", desc = "Open servers.json" },
@@ -787,7 +806,7 @@ end)
 
 -- Tokyonight スタイル切替（night/storm/moon）
 -- Tokyonight: スタイル/透明度/イタリックのトグル
-local tn_state = { style = "night", transparent = false, italic = { comments = true, keywords = false } }
+local tn_state = { style = "night", transparent = true, italic = { comments = true, keywords = false } }
 
 local function apply_tokyonight(opts)
   local ok, tn = pcall(require, "tokyonight")
@@ -844,6 +863,16 @@ vim.keymap.set("n", "<leader>um", function() set_tokyonight_style("moon") end, {
 vim.keymap.set("n", "<leader>uc", function() vim.cmd.colorscheme("cobalt2") end, { desc = "Theme: Cobalt2" })
 vim.keymap.set("n", "<leader>ut", function() toggle_tokyonight_transparent() end, { desc = "Theme: Transparent toggle" })
 vim.keymap.set("n", "<leader>ui", function() toggle_tokyonight_italics() end, { desc = "Theme: Italics toggle" })
+
+-- GUI クライアント（neovide）使用時: フォント/透過/ぼかしを WezTerm に近づける
+pcall(function()
+  if vim.g.neovide then
+    vim.o.guifont = "MesloLGS NF:h14"
+    vim.g.neovide_transparency = 0.65
+    vim.g.neovide_floating_blur_amount_x = 10
+    vim.g.neovide_floating_blur_amount_y = 10
+  end
+end)
 
 local cmp = require("cmp")
 local lspkind = require("lspkind")

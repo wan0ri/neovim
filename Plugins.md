@@ -35,6 +35,10 @@
   - 追加トグル: `<leader>ut`（transparent 切替）, `<leader>ui`（comments/keywords 斜体の切替）
 - cobalt2.nvim（Cobalt2 Theme Official 互換）
   - 切替: `<leader>uc` または `:Cobalt2Enable`
+
+- nvim-transparent（背景透過の一括管理）
+  - トグル: `<leader>uT`（TransparentToggle）
+  - 端末（WezTerm等）の透過/ぼかし設定をそのまま反映
 - vscode.nvim（代替）
 - cobalt2.nvim（代替・必要時のみ手動適用）
 
