@@ -1109,13 +1109,12 @@ local function setup_server(server)
 		}
 	end
 	local cfg = rawget(lspconfig, server)
-	if cfg and type(cfg.setup) == "function" then
-		cfg.setup(opts)
-	else
-		vim.schedule(function()
-			vim.notify("Skip unknown LSP server: " .. tostring(server), vim.log.levels.WARN)
-		end)
-	end
+    if cfg and type(cfg.setup) == "function" then
+        cfg.setup(opts)
+    else
+        -- Unknown name (e.g. non-LSP tool accidentally listed). Silently skip.
+        return
+    end
 end
 
 if type(mlsp.setup_handlers) == "function" then
