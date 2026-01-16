@@ -15,6 +15,10 @@ vim.opt.updatetime = 200
 vim.opt.termguicolors = true
 -- 検索ハイライトは普段はオフ。必要時だけ点灯（Escで消す）
 vim.opt.hlsearch = true
+-- 余計なメッセージを抑制（term:// やファイル情報のエコーを非表示）
+pcall(function()
+	vim.opt.shortmess:append("F") -- ファイル情報メッセージを抑制（term://... 等）
+end)
 
 -- MCP .env を読み込む（stdpath('config')/mcphub/.env）
 local function load_env_file(path)

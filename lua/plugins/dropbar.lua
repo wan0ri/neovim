@@ -13,7 +13,10 @@ return {
 		vim.api.nvim_create_autocmd("FileType", {
 			pattern = { "dashboard", "neo-tree", "help", "lazy", "mason", "gitcommit", "toggleterm" },
 			callback = function()
-				vim.opt_local.winbar = nil
+				-- 端末や特殊バッファでは winbar を空にする
+				pcall(function()
+					vim.opt_local.winbar = ""
+				end)
 			end,
 		})
 	end,

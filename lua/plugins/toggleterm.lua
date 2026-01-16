@@ -35,6 +35,13 @@ return {
 				pcall(vim.keymap.set, "t", "jk", [[<C-\><C-n>]], { buffer = 0 })
 				-- t-mode からもトグルできるように（Esc不要）
 				pcall(vim.keymap.set, "t", "<leader>tt", [[<C-\><C-n>:ToggleTerm<CR>]], { buffer = 0, silent = true })
+				-- 端末では余計なバーや行情報を隠す
+				pcall(function()
+					vim.opt_local.winbar = ""
+				end)
+				pcall(function()
+					vim.opt_local.statusline = " "
+				end)
 				vim.opt_local.number = false
 				vim.opt_local.relativenumber = false
 				vim.opt_local.signcolumn = "no"
