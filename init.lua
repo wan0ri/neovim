@@ -38,7 +38,7 @@ end
 local mcphub_dir = vim.fn.stdpath("config") .. "/mcphub"
 pcall(load_env_file, mcphub_dir .. "/.env")
 if not vim.env.MCP_SERVERS_PATH or #vim.env.MCP_SERVERS_PATH == 0 then
-  vim.env.MCP_SERVERS_PATH = mcphub_dir .. "/servers.json"
+	vim.env.MCP_SERVERS_PATH = mcphub_dir .. "/servers.json"
 end
 
 -- Terraform Cloud token aliases for Docker pass-through
@@ -70,14 +70,14 @@ end)
 
 -- 便利: .env の再読み込みコマンドと MCP 設定ファイルへジャンプ
 pcall(function()
-    vim.api.nvim_create_user_command("McpEnvReload", function()
-        pcall(load_env_file, mcphub_dir .. "/.env")
-        vim.notify("MCP .env reloaded", vim.log.levels.INFO)
-    end, {})
+	vim.api.nvim_create_user_command("McpEnvReload", function()
+		pcall(load_env_file, mcphub_dir .. "/.env")
+		vim.notify("MCP .env reloaded", vim.log.levels.INFO)
+	end, {})
 	vim.keymap.set("n", "<leader>ar", ":McpEnvReload<CR>", { desc = "AI/MCP: Reload .env" })
-    vim.keymap.set("n", "<leader>as", function()
-        vim.cmd("edit " .. (mcphub_dir .. "/servers.json"))
-    end, { desc = "AI/MCP: Open servers.json" })
+	vim.keymap.set("n", "<leader>as", function()
+		vim.cmd("edit " .. (mcphub_dir .. "/servers.json"))
+	end, { desc = "AI/MCP: Open servers.json" })
 end)
 
 -- Escで検索ハイライトを消す
@@ -85,9 +85,9 @@ vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR><Esc>", { desc = "Clear search 
 
 -- Git UI トグルを直結（lazyや他プラグインに依存しない内蔵terminal版）
 do
-  local git = require("config.git")
-  vim.keymap.set("n", "<leader>gg", git.toggle_lazygit, { desc = "Git: Lazygit (tab toggle)" })
-  vim.api.nvim_create_user_command("Lazygit", git.toggle_lazygit, { desc = "Lazygit (tab toggle)" })
+	local git = require("config.git")
+	vim.keymap.set("n", "<leader>gg", git.toggle_lazygit, { desc = "Git: Lazygit (tab toggle)" })
+	vim.api.nvim_create_user_command("Lazygit", git.toggle_lazygit, { desc = "Lazygit (tab toggle)" })
 end
 
 -- lazy.nvim 設定をモジュール化
@@ -95,13 +95,14 @@ require("config.lazy")
 
 -- 応急: 内蔵ターミナルでの Lazygit（toggleterm 不在時の代替）
 vim.keymap.set("n", "<leader>gG", function()
-  local cmd = "lazygit"
-  if vim.fn.executable("lazygit") ~= 1 then
-    cmd = [[bash -lc 'git status; echo; echo "Install lazygit with: brew install lazygit"; read -n1 -p "press any key to close..."']]
-  end
-  vim.cmd("tabnew")
-  vim.fn.termopen(cmd)
-  vim.cmd("startinsert")
+	local cmd = "lazygit"
+	if vim.fn.executable("lazygit") ~= 1 then
+		cmd =
+			[[bash -lc 'git status; echo; echo "Install lazygit with: brew install lazygit"; read -n1 -p "press any key to close..."']]
+	end
+	vim.cmd("tabnew")
+	vim.fn.termopen(cmd)
+	vim.cmd("startinsert")
 end, { desc = "Git: Lazygit (builtin term)" })
 -- Telescope VSCode風キーマップ
 local tb = require("telescope.builtin")
@@ -355,12 +356,12 @@ local function setup_server(server)
 		}
 	end
 	local cfg = rawget(lspconfig, server)
-    if cfg and type(cfg.setup) == "function" then
-        cfg.setup(opts)
-    else
-        -- Unknown name (e.g. non-LSP tool accidentally listed). Silently skip.
-        return
-    end
+	if cfg and type(cfg.setup) == "function" then
+		cfg.setup(opts)
+	else
+		-- Unknown name (e.g. non-LSP tool accidentally listed). Silently skip.
+		return
+	end
 end
 
 if type(mlsp.setup_handlers) == "function" then
@@ -388,7 +389,8 @@ require("conform").setup({
 		yaml = { "yamlfmt", "prettierd", "prettier" },
 		json = { "prettierd", "prettier" },
 		jsonc = { "prettierd", "prettier" },
-		markdown = { "prettierd", "prettier" },
+		-- Markdown は textlint --fix を優先し、その後 Prettier 系で整形
+		markdown = { "textlint", "prettierd", "prettier" },
 		sh = { "shfmt" },
 	},
 })
@@ -399,10 +401,9 @@ end, { desc = "Format" })
 
 -- Lint（markdownlint 等）
 local lint = require("lint")
-lint.linters_by_ft = {
-	markdown = { "markdownlint" },
-	yaml = { "yamllint" },
-}
+lint.linters_by_ft = lint.linters_by_ft or {}
+lint.linters_by_ft.markdown = { "textlint", "markdownlint" }
+lint.linters_by_ft.yaml = { "yamllint" }
 local lint_grp = vim.api.nvim_create_augroup("NvimLintOnSave", { clear = true })
 vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
 	group = lint_grp,
@@ -435,6 +436,10 @@ vim.api.nvim_create_autocmd("BufWritePre", {
 	group = trim_group,
 	pattern = "*",
 	callback = function()
+		-- Markdown のハード改行（行末2スペース）は保持
+		if vim.bo.filetype == "markdown" or vim.bo.filetype == "mdx" then
+			return
+		end
 		vim.cmd([[%s/\s\+$//e]])
 	end,
 })

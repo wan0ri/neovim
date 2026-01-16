@@ -1,8 +1,7 @@
 return {
-  "hashivim/vim-terraform",
-  config = function()
-    vim.g.terraform_fmt_on_save = 0
-    vim.g.terraform_align = 1
-  end,
+	"hashivim/vim-terraform",
+	config = function()
+		vim.g.terraform_fmt_on_save = 0
+		vim.g.terraform_align = 1
+	end,
 }
-
