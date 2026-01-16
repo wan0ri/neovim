@@ -16,6 +16,9 @@
 
 - lualine.nvim
   - ステータスライン（Tokyonight テーマ）。Git（branch/diff）と診断（error/warn/info/hint）を色分け表示
+- barbar.nvim（バッファタブ）
+  - 移動: `<leader>bn` / `<leader>bp`、クローズ: `<leader>bd`
+  - 直接ジャンプ: `<leader>1`〜`<leader>9`
 
 - indent-blankline.nvim（ibl）
   - インデントガイド。`dashboard` や `neo-tree` では非表示
@@ -80,6 +83,9 @@
 - gitsigns.nvim（行単位の差分/ステージ）
 - neogit（Git UI）: `:Neogit`
 - diffview.nvim（差分/履歴）: `:DiffviewOpen`, `:DiffviewClose`
+- gitsigns.nvim（行横に差分サイン/操作）: `]c`/`[c`, `:Gitsigns blame_line`
+- git-messenger.vim（最終コミットポップアップ）: `<leader>gm`
+- blamer.nvim（行末 blame）: `<leader>gB` でトグル
 - vim-fugitive（低レベル操作）: `:G ...`
 - lazygit（toggleterm 連携）: `<leader>gg` でフロート表示/非表示（Git ルートで起動）
 
@@ -118,6 +124,12 @@
   - 保存/挿入終了で実行（Markdown/YAML 既定）
   - Markdown 拡張: `textlint`（日本語の半角/全角やスペース規則）＋ `markdownlint-cli2`
     - ルール: `.textlintrc.json` / `.markdownlint.json`（MD009: 2スペース改行許容）
+
+- fidget.nvim（LSP進行状況の通知）
+- lspsaga.nvim（LSP UI 拡張）
+- lsp_signature.nvim（関数シグネチャのポップアップ）
+- trouble.nvim（診断/リスト UI）: `<leader>xx`
+- none-ls.nvim（旧 null-ls）: 軽量の code actions（gitsigns）を提供
 
 - mason-tool-installer.nvim（ツール自動導入）
   - 起動時に主要フォーマッタ/リンタを自動インストール/更新
@@ -160,8 +172,11 @@
 
 補足（Markdown 整形）
 
-- 保存時に Prettierd → Prettier の順で利用できる方を自動選択して整形します
+- 保存時に textlint --fix → Prettier(d) の順で整形します（2スペース改行は保持）
 - うまく整形されない場合は、プロジェクトに `.prettierrc` を用意してください
+
+- peek.nvim（Denoベースのプレビュー）
+  - `:PeekOpen` / `:PeekClose`、ショートカット: `<leader>mP` / `<leader>mX`
 
 ---
 
@@ -180,6 +195,7 @@
 
 - accelerated-jk.nvim
   - `j/k` 長押しで加速度スクロール
+- vim-tmux-navigator（tmuxとカーソル移動を統合）
 
 ## 編集支援 / マルチカーソル
 
@@ -188,3 +204,9 @@
   - 縦方向にカーソル追加（端末が対応する場合）: `Ctrl-Up` / `Ctrl-Down`
   - 終了: `Esc`
   - 詳細チートシート: `:help visual-multi`, `:help vm-tutorial`
+- nvim-surround（囲み編集: cs/ys/ds 相当）
+- treesj（配列/引数の split/join）: `<leader>tj`
+- various-textobjs（多様なテキストオブジェクト追加）
+- vim-commentary（行/選択のコメント）: `gc` / `gcc`
+- winresizer（分割サイズ変更モード）: `:WinResizerStartResize`
+- vim-operator-replace（置換オペレータ）: `gr{motion}`
