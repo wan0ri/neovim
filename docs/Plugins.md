@@ -68,7 +68,7 @@
 ## ターミナル
 
 - toggleterm.nvim
-  - 下パネル: `&lt;leader&gt;tt`（または `&lt;leader&gt;`+バッククォートキー）
+  - 下パネル: `<leader>tt`（または `<leader>`+バッククォートキー）
   - 右パネル: `<leader>tv`、フロート: `<leader>tf`
   - 端末内は `Esc` or `jk` でノーマル戻り
   - フロート枠の色はカラースキーム（Tokyonight）の `FloatBorder` に委譲
@@ -105,7 +105,7 @@
   - 補完エンジン。`<CR>` で確定（自動確定は無効）
 
 - conform.nvim（Format）
-  - 保存時自動フォーマット有効。手動は `Leader+f`
+  - 保存時自動フォーマット有効。手動は `<Leader>f`
   - 主な対応: Markdown/JSON/YAML/Shell/Lua/Terraform（`terraform fmt`）
   - 依存バイナリは Mason で自動導入（下記 `mason-tool-installer`）
 
