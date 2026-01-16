@@ -83,6 +83,11 @@
 - vim-fugitive（低レベル操作）: `:G ...`
 - lazygit（toggleterm 連携）: `<leader>gg` でフロート表示/非表示（Git ルートで起動）
 
+- octo.nvim（GitHub PR 操作）
+  - 代表コマンド: `:Octo pr list`（PR一覧）, `:Octo pr create`（PR作成）, `:Octo review start`（レビュー開始）
+  - ショートカット: `<leader>op`（PR一覧）, `<leader>oc`（PR作成）, `<leader>or`（レビュー開始）
+  - 事前に `gh auth login` を済ませておくと便利
+
 ---
 
 ## LSP/補完/フォーマット/診断
@@ -111,13 +116,21 @@
 
 - nvim-lint（Lint）
   - 保存/挿入終了で実行（Markdown/YAML 既定）
+  - Markdown 拡張: `textlint`（日本語の半角/全角やスペース規則）＋ `markdownlint-cli2`
+    - ルール: `.textlintrc.json` / `.markdownlint.json`（MD009: 2スペース改行許容）
 
 - mason-tool-installer.nvim（ツール自動導入）
   - 起動時に主要フォーマッタ/リンタを自動インストール/更新
   - 既定で導入するツール例
     - `prettierd`, `prettier`（Markdown/JSON/YAML など）
     - `stylua`（Lua）, `shfmt`（Shell）, `yamlfmt`, `yamllint`（YAML）
-    - `markdownlint`（Markdown）
+    - `markdownlint-cli2`（Markdown）, `textlint`（Markdown/日本語）
+
+### 補助プラグイン（自動で効くため操作不要）
+
+- nvim-hlslens: 検索 `n/N` の移動に追従して件数を表示（scrollbar と連携）
+- SchemaStore.nvim: YAML/JSON のスキーマ自動補完（`*ls` によるバリデーション精度向上）
+- friendly-snippets: 補完用のスニペット集（LuaSnip から参照）
 
 ---
 
