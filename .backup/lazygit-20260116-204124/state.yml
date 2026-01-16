@@ -1,0 +1,12 @@
+lastupdatecheck: 0
+recentrepos:
+    - /Users/wan0ri/project/techblog-prod
+    - /Users/wan0ri/.config/wezterm
+    - /Users/wan0ri/.config/nvim
+    - /Users/wan0ri/.config/mcphub
+startuppopupversion: 5
+didshowhunkstaginghint: false
+lastversion: 0.58.1
+customcommandshistory:
+    - :q
+hidecommandlog: false

@@ -1,0 +1,2 @@
+return { "rktjmp/lush.nvim" }
+

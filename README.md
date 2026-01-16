@@ -49,8 +49,8 @@
 - MCP クライアント: Codex CLI（TUI）を Neovim から起動
   - 起動キー: `<leader>ac`（トグル）
   - TUI 内で `:config reload` を実行すると `servers.json` の変更が反映されます
-- サーバー定義: `~/.config/mcphub/servers.json`
-- シークレット: `~/.config/mcphub/.env`（`.env.example` から作成）
+- サーバー定義: `~/.config/nvim/mcphub/servers.json`
+- シークレット: `~/.config/nvim/mcphub/.env`（`.env.example` から作成）
 - 便利コマンド/キー
   - `.env` 再読込: `:McpEnvReload` または Neovim 再起動
   - `servers.json` を開く: `<leader>as`
@@ -63,18 +63,18 @@
 - `playwright`: `npx -y @executeautomation/playwright-mcp-server`（`HEADLESS=1` 推奨）
 - `terraform`: `docker run --rm -i hashicorp/terraform-mcp-server:0.3.0`
   - コンテナへ `-e TFE_TOKEN` と `-e TF_TOKEN_app_terraform_io` を渡す設定
-  - `~/.config/mcphub/.env` の `TERRAFORM_CLOUD_TOKEN` を Neovim 側で前記2変数へエイリアス設定
+- `~/.config/nvim/mcphub/.env` の `TERRAFORM_CLOUD_TOKEN` を Neovim 側で前記2変数へエイリアス設定
 - `context7`: `npx -y @upstash/context7-mcp`
 
 **初期セットアップ手順**
 
 1. `.env` を作成
-   - `cp ~/.config/mcphub/.env.example ~/.config/mcphub/.env`
+   - `cp ~/.config/nvim/mcphub/.env.example ~/.config/nvim/mcphub/.env`
    - 必要値を追記
      - `GITHUB_TOKEN=...`
      - `CONTEXT7_API_KEY=...`
      - （任意）`TERRAFORM_CLOUD_TOKEN=...`
-   - 推奨: `chmod 600 ~/.config/mcphub/.env`
+   - 推奨: `chmod 600 ~/.config/nvim/mcphub/.env`
 2. Neovim で反映
    - `:McpEnvReload` または再起動
 3. Codex TUI を開き反映確認
@@ -86,7 +86,7 @@
 
 ```bash
 # .env を環境にロード（zsh/bash）
-set -a; . "$HOME/.config/mcphub/.env" 2>/dev/null || true; set +a
+set -a; . "$HOME/.config/nvim/mcphub/.env" 2>/dev/null || true; set +a
 
 # Filesystem
 npx -y @modelcontextprotocol/server-filesystem
@@ -110,7 +110,7 @@ docker run --rm -i \
 補足:
 
 - `TERRAFORM_CLOUD_TOKEN` を `.env` に設定すると、`init.lua` 側で `TFE_TOKEN` と `TF_TOKEN_app_terraform_io` が自動で同値にエイリアスされます。
-- 一部クライアントは環境変数 `MCP_SERVERS_PATH` でサーバー定義ファイルを指示できます（例: `~/.config/mcphub/servers.json`）。未対応でも悪影響はありません。
+- 一部クライアントは環境変数 `MCP_SERVERS_PATH` でサーバー定義ファイルを指示できます（例: `~/.config/nvim/mcphub/servers.json`）。未対応でも悪影響はありません。
 
 **セキュリティ運用**
 
