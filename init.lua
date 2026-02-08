@@ -357,6 +357,18 @@ local function setup_server(server)
 	local opts = { capabilities = capabilities, on_attach = on_attach }
     if server == "yamlls" then
         local ok_ss, schemastore = pcall(require, "schemastore")
+        local schemas = ok_ss and schemastore.yaml.schemas() or {}
+        -- Add local schema mapping for Hugo config to silence YAML LS noise
+        local cwd = vim.loop.cwd() or vim.fn.getcwd()
+        local schema_path = (vim.fs and vim.fs.joinpath or function(...) return table.concat({...}, "/") end)(cwd, "schemas", "hugoblox.schema.json")
+        if type(cwd) == "string" and vim.loop.fs_stat(schema_path) then
+            table.insert(schemas, {
+                fileMatch = {
+                    "config/_default/hugo.yaml",
+                },
+                url = ("file://%s"):format(schema_path),
+            })
+        end
         opts.settings = {
             yaml = {
                 keyOrdering = false,
@@ -364,7 +376,7 @@ local function setup_server(server)
                 format = { enable = true },
                 kubernetes = true,
                 schemaStore = { enable = false, url = "" },
-                schemas = ok_ss and schemastore.yaml.schemas() or {},
+                schemas = schemas,
             },
         }
     elseif server == "jsonls" then
