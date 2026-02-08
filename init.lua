@@ -302,12 +302,16 @@ do
     end
 end
 
--- autopairs（括弧補完）と cmp の連携
-local ok_pairs, npairs = pcall(require, "nvim-autopairs")
-if ok_pairs then
-	npairs.setup({})
-	local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-	cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+do
+    local ok_pairs, npairs = pcall(require, "nvim-autopairs")
+    if ok_pairs then
+        npairs.setup({})
+        local ok_cmp, cmp = pcall(require, "cmp")
+        local ok_cap, cmp_autopairs = pcall(require, "nvim-autopairs.completion.cmp")
+        if ok_cmp and ok_cap then
+            cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+        end
+    end
 end
 
 -- LSP設定（存在しない場合は静かにスキップ）
@@ -410,6 +414,9 @@ elseif ok_mlsp then
 	for _, server in ipairs(mlsp.get_installed_servers()) do
 		setup_server(server)
 	end
+end
+
+-- close: if ok_mlsp then
 end
 
 -- Format on Save（VSCode: editor.formatOnSave = true 相当）
