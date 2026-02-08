@@ -4,11 +4,6 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
--- 任意プロバイダ（未使用なら警告を抑止）
-vim.g.loaded_python3_provider = 0
-vim.g.loaded_perl_provider = 0
-vim.g.loaded_ruby_provider = 0
-
 -- 基本オプション（VSCode寄り）
 vim.opt.number = true
 vim.opt.relativenumber = false
@@ -23,27 +18,6 @@ vim.opt.hlsearch = true
 -- 余計なメッセージを抑制（term:// やファイル情報のエコーを非表示）
 pcall(function()
 	vim.opt.shortmess:append("F") -- ファイル情報メッセージを抑制（term://... 等）
-end)
-
--- 追加の filetype 定義（LSPの unknown filetype 警告を解消）
-pcall(function()
-    vim.filetype.add({
-        extension = {
-            mdx = "markdown.mdx",
-            tfvars = "terraform-vars",
-        },
-        filename = {
-            ["docker-compose.yaml"] = "yaml.docker-compose",
-            ["docker-compose.yml"] = "yaml.docker-compose",
-            ["compose.yaml"] = "yaml.docker-compose",
-            ["compose.yml"] = "yaml.docker-compose",
-            ["values.yaml"] = "yaml.helm-values",
-            ["values.yml"] = "yaml.helm-values",
-        },
-        pattern = {
-            [".*%.gitlab%-ci%.ya?ml"] = "yaml.gitlab",
-        },
-    })
 end)
 
 -- MCP .env を読み込む（stdpath('config')/mcphub/.env）
@@ -134,6 +108,17 @@ vim.keymap.set("n", "<leader>gG", function()
 	vim.fn.termopen(cmd)
 	vim.cmd("startinsert")
 end, { desc = "Git: Lazygit (builtin term)" })
+-- Telescope VSCode風キーマップ
+local tb = require("telescope.builtin")
+vim.keymap.set("n", "<C-p>", tb.find_files, { desc = "Quick Open (files)" })
+vim.keymap.set("n", "<leader>fa", function()
+	tb.find_files({ no_ignore = true, hidden = true })
+end, { desc = "Find files (ALL: hidden & gitignored)" })
+vim.keymap.set("n", "<leader>ff", tb.find_files, { desc = "Find files" })
+vim.keymap.set("n", "<leader>fg", tb.live_grep, { desc = "Search in files" })
+vim.keymap.set("n", "<leader>fb", tb.buffers, { desc = "Find buffers" })
+vim.keymap.set("n", "<leader>sp", tb.commands, { desc = "Command Palette" })
+
 -- コメント（Ctrl-/ は端末では届かない場合があるので WezTerm 側で送出を推奨）
 pcall(function()
 	local api = require("Comment.api")
@@ -245,62 +230,49 @@ pcall(function()
 	end
 end)
 
-do
-    local ok_cmp, cmp = pcall(require, "cmp")
-    if ok_cmp then
-        local ok_lspkind, lspkind = pcall(require, "lspkind")
-        if ok_lspkind then
-            -- VSCode風のアイコンを付与
-            lspkind.init({ mode = "symbol_text", preset = "default" })
-        end
-        cmp.setup({
-            snippet = {
-                expand = function(args)
-                    pcall(function()
-                        require("luasnip").lsp_expand(args.body)
-                    end)
-                end,
-            },
-            mapping = cmp.mapping.preset.insert({
-                ["<CR>"] = cmp.mapping.confirm({ select = false }),
-                ["<C-Space>"] = cmp.mapping.complete(),
-                ["<Tab>"] = cmp.mapping.select_next_item(),
-                ["<S-Tab>"] = cmp.mapping.select_prev_item(),
-            }),
-            sources = {
-                { name = "nvim_lsp" },
-                { name = "nvim_lsp_signature_help" },
-                { name = "path" },
-                { name = "buffer" },
-            },
-            formatting = ok_lspkind and {
-                format = lspkind.cmp_format({
-                    mode = "symbol_text",
-                    menu = {
-                        nvim_lsp = "[LSP]",
-                        nvim_lsp_signature_help = "[Sig]",
-                        buffer = "[Buf]",
-                        path = "[Path]",
-                        luasnip = "[Snip]",
-                    },
-                    maxwidth = 50,
-                    ellipsis_char = "…",
-                }),
-            } or nil,
-            preselect = cmp.PreselectMode.None,
-            completion = { completeopt = "menu,menuone,noinsert" },
-        })
-        -- autopairs（括弧補完）と cmp の連携
-        local ok_pairs, npairs = pcall(require, "nvim-autopairs")
-        if ok_pairs then
-            npairs.setup({})
-            local ok_cap, cmp_autopairs = pcall(require, "nvim-autopairs.completion.cmp")
-            if ok_cap then
-                cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-            end
-        end
-    end
-end
+local cmp = require("cmp")
+local lspkind = require("lspkind")
+-- VSCode風のアイコンを付与
+lspkind.init({
+	mode = "symbol_text",
+	preset = "default",
+})
+
+cmp.setup({
+	snippet = {
+		expand = function(args)
+			require("luasnip").lsp_expand(args.body)
+		end,
+	},
+	mapping = cmp.mapping.preset.insert({
+		["<CR>"] = cmp.mapping.confirm({ select = false }),
+		["<C-Space>"] = cmp.mapping.complete(),
+		["<Tab>"] = cmp.mapping.select_next_item(),
+		["<S-Tab>"] = cmp.mapping.select_prev_item(),
+	}),
+	sources = {
+		{ name = "nvim_lsp" },
+		{ name = "nvim_lsp_signature_help" },
+		{ name = "path" },
+		{ name = "buffer" },
+	},
+	formatting = {
+		format = lspkind.cmp_format({
+			mode = "symbol_text",
+			menu = {
+				nvim_lsp = "[LSP]",
+				nvim_lsp_signature_help = "[Sig]",
+				buffer = "[Buf]",
+				path = "[Path]",
+				luasnip = "[Snip]",
+			},
+			maxwidth = 50,
+			ellipsis_char = "…",
+		}),
+	},
+	preselect = cmp.PreselectMode.None,
+	completion = { completeopt = "menu,menuone,noinsert" },
+})
 
 -- autopairs（括弧補完）と cmp の連携
 local ok_pairs, npairs = pcall(require, "nvim-autopairs")
@@ -310,10 +282,9 @@ if ok_pairs then
 	cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 end
 
--- LSP設定（存在しない場合は静かにスキップ）
-local ok_lspconfig, lspconfig = pcall(require, "lspconfig")
-local ok_cnl, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
-local capabilities = ok_cnl and cmp_nvim_lsp.default_capabilities() or {}
+-- LSP設定
+local lspconfig = require("lspconfig")
+local capabilities = require("cmp_nvim_lsp").default_capabilities()
 local on_attach = function(_, bufnr)
 	local map = function(mode, lhs, rhs, desc)
 		vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
@@ -333,8 +304,7 @@ pcall(function()
 	require("neodev").setup({ library = { types = true } })
 end)
 
-local ok_mlsp, mlsp = pcall(require, "mason-lspconfig")
-if ok_mlsp then
+local mlsp = require("mason-lspconfig")
 mlsp.setup({
 	ensure_installed = {
 		"terraformls",
@@ -351,26 +321,24 @@ mlsp.setup({
 -- Mason のインストール先を自動的に使う共通ハンドラ（古いバージョンでも動くようフォールバック）
 local function setup_server(server)
 	local opts = { capabilities = capabilities, on_attach = on_attach }
-    if server == "yamlls" then
-        local ok_ss, schemastore = pcall(require, "schemastore")
-        opts.settings = {
-            yaml = {
-                keyOrdering = false,
-                validate = true,
-                format = { enable = true },
-                kubernetes = true,
-                schemaStore = { enable = false, url = "" },
-                schemas = ok_ss and schemastore.yaml.schemas() or {},
-            },
-        }
-    elseif server == "jsonls" then
-        local ok_ss, schemastore = pcall(require, "schemastore")
-        opts.settings = {
-            json = {
-                validate = { enable = true },
-                schemas = ok_ss and schemastore.json.schemas() or {},
-            },
-        }
+	if server == "yamlls" then
+		opts.settings = {
+			yaml = {
+				keyOrdering = false,
+				validate = true,
+				format = { enable = true },
+				kubernetes = true,
+				schemaStore = { enable = false, url = "" },
+				schemas = require("schemastore").yaml.schemas(),
+			},
+		}
+	elseif server == "jsonls" then
+		opts.settings = {
+			json = {
+				validate = { enable = true },
+				schemas = require("schemastore").json.schemas(),
+			},
+		}
 	elseif server == "lua_ls" then
 		-- neodev による型情報を前提にしつつ、明示的に設定を補強
 		local runtime_files = vim.api.nvim_get_runtime_file("", true)
@@ -400,23 +368,20 @@ local function setup_server(server)
 	end
 end
 
-if ok_mlsp and type(mlsp.setup_handlers) == "function" then
+if type(mlsp.setup_handlers) == "function" then
 	mlsp.setup_handlers({
 		function(server)
 			setup_server(server)
 		end,
 	})
-elseif ok_mlsp then
+else
 	for _, server in ipairs(mlsp.get_installed_servers()) do
 		setup_server(server)
 	end
 end
 
 -- Format on Save（VSCode: editor.formatOnSave = true 相当）
-do
-  local ok_conform, conform = pcall(require, "conform")
-  if ok_conform then
-conform.setup({
+require("conform").setup({
 	format_on_save = {
 		lsp_fallback = true,
 		timeout_ms = 2000,
@@ -435,45 +400,39 @@ conform.setup({
 })
 
 vim.keymap.set({ "n", "v" }, "<leader>f", function()
-    local ok, conform = pcall(require, "conform")
-    if ok then conform.format({ async = true, lsp_fallback = true }) end
+	require("conform").format({ async = true, lsp_fallback = true })
 end, { desc = "Format" })
-  end
-end
 
-do
-  local ok_lint, lint = pcall(require, "lint")
-  if ok_lint then
-    lint.linters_by_ft = lint.linters_by_ft or {}
-    lint.linters_by_ft.markdown = { "textlint", "markdownlint" }
-    lint.linters_by_ft.yaml = { "yamllint" }
-    local lint_grp = vim.api.nvim_create_augroup("NvimLintOnSave", { clear = true })
-    vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
-        group = lint_grp,
-        callback = function()
-            local ft = vim.bo.filetype
-            local names = lint.linters_by_ft[ft]
-            if not names then
-                return
-            end
-            local runnable = {}
-            for _, name in ipairs(names) do
-                local linter = lint.linters[name]
-                if linter then
-                    local cmd = type(linter.cmd) == "function" and linter.cmd() or linter.cmd
-                    local exe = type(cmd) == "table" and cmd[1] or cmd
-                    if vim.fn.executable(exe) == 1 then
-                        table.insert(runnable, name)
-                    end
-                end
-            end
-            if #runnable > 0 then
-                lint.try_lint(runnable)
-            end
-        end,
-    })
-  end
-end
+-- Lint（markdownlint 等）
+local lint = require("lint")
+lint.linters_by_ft = lint.linters_by_ft or {}
+lint.linters_by_ft.markdown = { "textlint", "markdownlint" }
+lint.linters_by_ft.yaml = { "yamllint" }
+local lint_grp = vim.api.nvim_create_augroup("NvimLintOnSave", { clear = true })
+vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
+	group = lint_grp,
+	callback = function()
+		local ft = vim.bo.filetype
+		local names = lint.linters_by_ft[ft]
+		if not names then
+			return
+		end
+		local runnable = {}
+		for _, name in ipairs(names) do
+			local linter = lint.linters[name]
+			if linter then
+				local cmd = type(linter.cmd) == "function" and linter.cmd() or linter.cmd
+				local exe = type(cmd) == "table" and cmd[1] or cmd
+				if vim.fn.executable(exe) == 1 then
+					table.insert(runnable, name)
+				end
+			end
+		end
+		if #runnable > 0 then
+			lint.try_lint(runnable)
+		end
+	end,
+})
 
 -- 便利: 保存時に末尾空白削除（VSCode設定に準拠）
 local trim_group = vim.api.nvim_create_augroup("TrimWhitespaceOnSave", { clear = true })
