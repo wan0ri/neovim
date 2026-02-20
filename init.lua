@@ -9,6 +9,10 @@ vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
 
 -- 基本オプション（VSCode寄り）
+-- エンコーディングは UTF-8 を強制
+vim.opt.encoding = "utf-8"
+vim.opt.fileencoding = "utf-8"
+vim.opt.fileencodings = "utf-8,ucs-bom"
 vim.opt.number = true
 vim.opt.relativenumber = false
 vim.opt.wrap = false
@@ -24,9 +28,9 @@ pcall(function()
 	vim.opt.shortmess:append("F") -- ファイル情報メッセージを抑制（term://... 等）
 end)
 
--- Diagnostics: show error codes and handy shortcuts
+-- 診断: エラーコードと便利なショートカットを表示
 do
-	-- extract diagnostic code from various servers
+	-- さまざまなサーバーから診断コードを抽出する
 	local function code_of(d)
 		local c = d and d.code
 		if type(c) == "table" then
@@ -38,7 +42,7 @@ do
 		return c
 	end
 
-	-- add [CODE] prefix in diagnostic float
+	-- 診断フロートに[CODE]プレフィックスを追加
 	vim.diagnostic.config({
 		float = {
 			border = "rounded",
@@ -51,12 +55,12 @@ do
 		severity_sort = true,
 	})
 
-	-- <leader>e: open line diagnostics float (always line scope)
+	-- <leader>e: オープン行診断フロート（常に行スコープ）
 	vim.keymap.set("n", "<leader>e", function()
 		vim.diagnostic.open_float(0, { scope = "line", focus = true })
 	end, { desc = "Diagnostics: Line float ([CODE] msg)" })
 
-	-- <leader>ec: copy current line's top diagnostic (code: message)
+	-- <leader>ec: 現在の行の先頭の診断をコピー (コード: メッセージ)
 	vim.keymap.set("n", "<leader>ec", function()
 		local lnum = vim.api.nvim_win_get_cursor(0)[1] - 1
 		local ds = vim.diagnostic.get(0, { lnum = lnum })
@@ -75,7 +79,7 @@ do
 		pcall(vim.notify, "Copied diagnostic" .. (c and (" (" .. c .. ")") or ""), vim.log.levels.INFO)
 	end, { desc = "Diagnostics: Copy current (code+message)" })
 
-	-- <leader>ev: toggle inline virtual_text with [CODE]
+	-- <leader>ev: インライン仮想テキストを [CODE] で切り替える
 	vim.keymap.set("n", "<leader>ev", function()
 		local cfg = vim.diagnostic.config()
 		local v = cfg.virtual_text
@@ -97,7 +101,7 @@ do
 		end
 	end, { desc = "Diagnostics: Toggle virtual_text ([CODE] msg)" })
 
-	-- <leader>el: toggle virtual_lines (Neovim 0.11+)
+	-- <leader>el: virtual_lines を切り替える (Neovim 0.11+)
 	if vim.fn.has("nvim-0.11") == 1 then
 		vim.keymap.set("n", "<leader>el", function()
 			local cfg = vim.diagnostic.config()
@@ -167,7 +171,7 @@ if not vim.env.MCP_SERVERS_PATH or #vim.env.MCP_SERVERS_PATH == 0 then
 	vim.env.MCP_SERVERS_PATH = mcphub_dir .. "/servers.json"
 end
 
--- Terraform Cloud token aliases for Docker pass-through
+-- Docker パススルー用の Terraform Cloud トークン エイリアス
 if vim.env.TERRAFORM_CLOUD_TOKEN and (#vim.env.TERRAFORM_CLOUD_TOKEN > 0) then
 	if not vim.env.TFE_TOKEN or #vim.env.TFE_TOKEN == 0 then
 		vim.env.TFE_TOKEN = vim.env.TERRAFORM_CLOUD_TOKEN
@@ -495,6 +499,8 @@ if ok_mlsp then
 					runtime = { version = "LuaJIT" },
 					diagnostics = {
 						globals = { "vim" },
+						-- コメントなどの Unicode を含む行での警告を抑止
+						disable = { "unicode-name" },
 						-- 必要なら undefined-global を抑制: disable = { "undefined-global" },
 					},
 					workspace = {
@@ -544,7 +550,7 @@ do
 				lua = { "stylua" },
 				terraform = { "terraform_fmt" },
 				hcl = { "terraform_fmt" },
-				yaml = { "yamlfmt", "prettierd", "prettier" },
+				yaml = { "yamlfmt" },
 				json = { "prettierd", "prettier" },
 				jsonc = { "prettierd", "prettier" },
 				-- Markdown は textlint --fix を優先し、その後 Prettier 系で整形
@@ -629,5 +635,20 @@ vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 		if file:find(cfg, 1, true) == 1 then
 			vim.opt_local.spell = false
 		end
+	end,
+})
+
+-- Auto-read external updates for buffers
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI" }, {
+	callback = function()
+		if vim.fn.mode() ~= "c" then
+			vim.cmd("checktime")
+		end
+	end,
+})
+vim.api.nvim_create_autocmd("FileChangedShellPost", {
+	callback = function()
+		vim.notify("File changed on disk. Buffer reloaded.", vim.log.levels.WARN)
 	end,
 })
