@@ -626,6 +626,30 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
+-- Neovim 0.12.4 + treesitter の既知不具合回避:
+-- Markdown 系では builtin highlighter ごと停止して従来 syntax にフォールバックする
+vim.api.nvim_create_autocmd("FileType", {
+	group = spell_group,
+	pattern = { "markdown", "mdx" },
+	callback = function(args)
+		pcall(vim.treesitter.stop, args.buf)
+		pcall(vim.cmd, "silent! TSBufDisable highlight")
+		pcall(vim.cmd, "silent! TSBufDisable incremental_selection")
+		vim.bo[args.buf].syntax = "markdown"
+	end,
+})
+
+vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile", "BufEnter" }, {
+	group = spell_group,
+	pattern = "*",
+	callback = function(args)
+		local name = vim.api.nvim_buf_get_name(args.buf)
+		if name ~= "" and vim.fn.isdirectory(name) == 1 then
+			pcall(vim.treesitter.stop, args.buf)
+		end
+	end,
+})
+
 -- 診断の下線スタイルはカラースキーム（例: Tokyonight の undercurl）に委譲
 vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
 	group = spell_group,

@@ -6,12 +6,22 @@ M._win = nil
 M._buf = nil
 
 local function git_root()
-  local cwd = vim.loop.cwd() or vim.fn.getcwd()
-  local out = vim.fn.systemlist({ "bash", "-lc", "git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel" })
-  if type(out) == "table" and #out > 0 and out[1] ~= "" then
-    return out[1]
+  local fallback = vim.fn.stdpath("config")
+  local cwd = vim.loop.cwd() or vim.fn.getcwd() or fallback
+
+  if vim.fn.isdirectory(cwd) ~= 1 then
+    local parent = vim.fn.fnamemodify(cwd, ":p:h")
+    cwd = vim.fn.isdirectory(parent) == 1 and parent or fallback
   end
-  return cwd
+
+  local out = vim.fn.systemlist({ "bash", "-lc", "git -C " .. vim.fn.shellescape(cwd) .. " rev-parse --show-toplevel" })
+  local root = (type(out) == "table" and #out > 0 and out[1] ~= "") and out[1] or cwd
+
+  if vim.fn.isdirectory(root) ~= 1 then
+    return fallback
+  end
+
+  return root
 end
 
 local function reset_state()

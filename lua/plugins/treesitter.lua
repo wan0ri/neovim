@@ -15,7 +15,11 @@ return {
 			highlight = {
 				enable = true,
 				additional_vim_regex_highlighting = { "terraform", "hcl", "yaml", "markdown" },
-				disable = function(lang)
+				disable = function(lang, buf)
+					local name = vim.api.nvim_buf_get_name(buf)
+					if name ~= "" and vim.fn.isdirectory(name) == 1 then
+						return true
+					end
 					return lang == "markdown" or lang == "markdown_inline"
 				end,
 			},

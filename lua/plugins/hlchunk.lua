@@ -39,6 +39,8 @@ return {
 					"TelescopePrompt",
 					"TelescopeResults",
 					"gitcommit",
+					"markdown",
+					"mdx",
 				},
 			},
 			indent = { enable = false },
