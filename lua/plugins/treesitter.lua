@@ -13,15 +13,9 @@ return {
 		require("nvim-treesitter.configs").setup({
 			parser_install_dir = parser_root,
 			highlight = {
-				enable = true,
+				-- Neovim 0.12.4 環境で highlighter が不安定なため、まず全面停止する
+				enable = false,
 				additional_vim_regex_highlighting = { "terraform", "hcl", "yaml", "markdown" },
-				disable = function(lang, buf)
-					local name = vim.api.nvim_buf_get_name(buf)
-					if name ~= "" and vim.fn.isdirectory(name) == 1 then
-						return true
-					end
-					return lang == "markdown" or lang == "markdown_inline"
-				end,
 			},
 			ensure_installed = {
 				"lua",

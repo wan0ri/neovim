@@ -8,6 +8,16 @@ vim.g.loaded_python3_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
 
+-- Neovim 0.12.4 環境で Tree-sitter highlighter が不安定なため、
+-- plugin 側からの `vim.treesitter.start()` を一律で抑止する
+do
+	local original_treesitter_start = vim.treesitter.start
+	vim.treesitter.start = function(...)
+		return nil
+	end
+	vim.g._original_treesitter_start = original_treesitter_start
+end
+
 -- 基本オプション（VSCode寄り）
 -- エンコーディングは UTF-8 を強制
 vim.opt.encoding = "utf-8"
