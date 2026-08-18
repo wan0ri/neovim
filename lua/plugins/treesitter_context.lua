@@ -12,7 +12,7 @@ return {
 			separator = "─",
 		})
 		vim.api.nvim_create_autocmd("FileType", {
-			pattern = { "dashboard", "neo-tree", "help", "lazy", "mason", "gitcommit", "toggleterm" },
+			pattern = { "dashboard", "neo-tree", "help", "lazy", "mason", "gitcommit", "toggleterm", "markdown" },
 			callback = function()
 				pcall(require("treesitter-context").disable)
 			end,

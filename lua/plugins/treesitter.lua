@@ -2,8 +2,23 @@ return {
 	"nvim-treesitter/nvim-treesitter",
 	build = ":TSUpdate",
 	config = function()
+		local parser_root = vim.fn.stdpath("config") .. "/ts-parsers"
+		vim.fn.mkdir(parser_root, "p")
+
+		-- Neovim本体更新後も古いparserを拾わないよう、config配下へ固定する
+		if not vim.tbl_contains(vim.opt.runtimepath:get(), parser_root) then
+			vim.opt.runtimepath:prepend(parser_root)
+		end
+
 		require("nvim-treesitter.configs").setup({
-			highlight = { enable = true, additional_vim_regex_highlighting = { "terraform", "hcl", "yaml" } },
+			parser_install_dir = parser_root,
+			highlight = {
+				enable = true,
+				additional_vim_regex_highlighting = { "terraform", "hcl", "yaml", "markdown" },
+				disable = function(lang)
+					return lang == "markdown" or lang == "markdown_inline"
+				end,
+			},
 			ensure_installed = {
 				"lua",
 				"vim",
@@ -14,6 +29,8 @@ return {
 				"dockerfile",
 				"hcl",
 				"terraform",
+				"markdown",
+				"markdown_inline",
 			},
 		})
 	end,
